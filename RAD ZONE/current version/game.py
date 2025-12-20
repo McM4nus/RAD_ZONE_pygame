@@ -179,7 +179,10 @@ class Game:
         w, h = self._screen.get_size()
 
         # Create player
-        self._player = Player(self.char_surf, self.char_rect, self.sound)
+        # self._player = Player(self.char_surf, self.char_rect, self.sound)
+        start_pos = self.char_rect.center  # this gives a (x, y) tuple
+        self._player = Player(self.char_surf, self.sound, pos=start_pos)
+                                                                
 
 
         # Create zombie spawner (pass SoundManager)
@@ -199,8 +202,6 @@ class Game:
         self._inventory = self._create_inventory((w, h))
         self._inventory_key_down = False
         # self.sound.play_zombie_death()
-
-
 
     # ---------------- GAME LOOP ----------------
     def run(self):
@@ -227,7 +228,6 @@ class Game:
                 self._death_loop()
 
     # ---------------- GAMEPLAY LOOP ----------------
-# ---------------- GAMEPLAY LOOP ----------------
     def _game_loop(self):
         while self.state == "PLAYING":
             dt = self._clock.tick(120) / 1000
@@ -349,7 +349,6 @@ class Game:
 
             pygame.display.flip()
 
-
     # ---------------- KNIFE LOGIC ----------------
     def _handle_attack(self, current_time, player_pos):
         player = self._player
@@ -372,9 +371,6 @@ class Game:
 
                 player._attack_last_time = current_time
 
-
-
-
     # ---------------- ZOMBIE DAMAGE ----------------
     def _handle_zombie_attacks(self, player_pos, dt):
         for zombie in self._zombie_spawner.get_zombies():
@@ -382,7 +378,6 @@ class Game:
                 self._player.take_damage(zombie._damage_per_second * dt)
 
     # ---------------- DEATH SCREEN ----------------
-        # ---------------- DEATH SCREEN ----------------
     def _death_loop(self):
         kills = self._zombie_spawner.get_kill_count()
 
@@ -409,7 +404,6 @@ class Game:
                 self._reset_game()
                 self.state = "MENU"
                 return
-
 
     # ---------------- RESET GAME ----------------
     def _reset_game(self):

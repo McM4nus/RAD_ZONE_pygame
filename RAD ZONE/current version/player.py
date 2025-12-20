@@ -5,14 +5,27 @@ from animation import Animator
 from zombie import Zombie
 
 class Player:
-    def __init__(self, surf, rect, sound):
+    DEBUG = True  # debug hitbox
+
+    def __init__(self, surf, sound, pos=(0,0)):
         self._surf = surf
-        self._rect = rect
-        self._pos = pygame.Vector2(self._rect.center)
+        
+        # Create rect at given position (size of sprite)
+        self._rect = surf.get_rect(center=pos)
+        
+        # --- Adjust rect size ---
+        self._rect.width = 70
+        self._rect.height = 120
+        
+        # --- Offset the rect relative to sprite center ---
+        self._rect_offset = pygame.Vector2(3, 10)  # move rect right by 30 pixels
+        
+        # Position vector = logical player position (sprite center)
+        self._pos = pygame.Vector2(pos)
+
         self.sound = sound
         self.animator = Animator("RAD ZONE/current version/Graphics/player")
-        self._tracers = []  # List of dicts: {'pos', 'dir', 'speed', 'distance', 'start'}
-
+        self._tracers = []
 
         # Movement
         self._move_dir = pygame.Vector2()
@@ -42,7 +55,7 @@ class Player:
 
         # Equipped item
         self._equipped_item = None
-        self.weapon = None  # only if equipped item is WeaponItem
+        self.weapon = None
 
         # Melee
         self._is_stabbing = False
@@ -50,7 +63,7 @@ class Player:
         self._attack_last_time = 0
         self._attack_targets_hit = set()
 
-        # Inventory reference (will be set externally)
+        # Inventory
         self._inventory = None
 
         # Mouse
@@ -77,10 +90,9 @@ class Player:
         else:
             self.weapon = None
 
-
-
     # ---------- HEALTH ----------
     def get_health(self): return self._health
+
     def get_max_health(self): return self._max_health
 
     def take_damage(self, damage):
@@ -96,7 +108,9 @@ class Player:
 
     # ---------- STAMINA ----------
     def get_stamina(self): return self._stamina
+
     def get_max_stamina(self): return self._max_stamina
+
     def is_exhausted(self): return self._exhausted
 
     def restore_stamina(self, amount):
@@ -127,7 +141,7 @@ class Player:
         self._mouse_world = pygame.Vector2(mouse_world)
         self._mouse_screen = pygame.Vector2(pygame.mouse.get_pos())
 
-        # Movement
+        # Movement input
         dx = keys[pygame.K_d] - keys[pygame.K_q]
         dy = keys[pygame.K_s] - keys[pygame.K_z]
         velocity = pygame.Vector2(dx, dy)
@@ -136,13 +150,19 @@ class Player:
         if moving:
             velocity = velocity.normalize()
         self._move_dir = velocity
+
+        # Update stamina
         self._update_stamina(running, dt, current_time)
+
+        # Update position
         self._pos += velocity * self._speed * dt
 
-        # Clamp player position to map
+        # Clamp position to map
         self._pos.x = max(self._rect.width//2, min(self._pos.x, 7680 - self._rect.width//2))
         self._pos.y = max(self._rect.height//2, min(self._pos.y, 6400 - self._rect.height//2))
-        self._rect.center = self._pos
+
+        # Apply offset when updating rect
+        self._rect.center = self._pos + self._rect_offset
 
         # Animation
         self.animator.update(self._move_dir, dt, current_time, override_stab=self._is_stabbing)
@@ -228,9 +248,6 @@ class Player:
             if self.sound:
                 self.sound.play_weapon(weapon_id, "shoot")
 
-
-
-
     # ---------------- KNIFE STAB ----------------
     def _start_stab(self, current_time):
         """Initiates a knife stab attack."""
@@ -240,7 +257,6 @@ class Player:
         self._attack_targets_hit = set()
         self.animator.play_stab()
         self._apply_knife_damage()
-
 
     # ---------------- APPLY DAMAGE ----------------
     def _apply_knife_damage(self):
@@ -330,24 +346,30 @@ class Player:
             'start': start.copy()
         })
 
-
-            
-
     # ---------- DRAW ----------
     def draw(self, screen, camera):
+        cam_offset = camera.get_position()  # World -> screen conversion
+
+        # --- Sprite ---
         image = self.animator.get_image()
-        rect = image.get_rect(center=screen.get_rect().center)
+        sprite_pos = self._pos  # logical player position (world coordinates)
 
-        if self._move_dir.y < 0:
-            self.draw_weapon(screen)
+        # Draw sprite at world position relative to camera
+        sprite_screen_pos = sprite_pos - cam_offset
+        sprite_rect = image.get_rect(center=sprite_screen_pos)
+        screen.blit(image, sprite_rect)
 
-        screen.blit(image, rect)
+        # --- Weapon (if equipped) ---
+        if self._equipped_item:
+            self.draw_weapon(screen, cam_offset)
 
-        if self._move_dir.y >= 0:
-            self.draw_weapon(screen)
+        # --- DEBUG: Player_hitbox ---
+        # if Player.DEBUG:
+        #     debug_rect = self._rect.copy()
+        #     debug_rect.topleft -= cam_offset  # convert world -> screen
+        #     pygame.draw.rect(screen, (255, 0, 0), debug_rect, 2)
 
-        # -------- DRAW TRACERS --------
-        cam_offset = camera.get_position()
+        # --- Draw tracers ---
         for tracer in self._tracers:
             tracer_pos = tracer['pos'] - cam_offset
             pygame.draw.circle(
@@ -357,8 +379,7 @@ class Player:
                 3
             )
 
-
-    def draw_weapon(self, screen):
+    def draw_weapon(self, screen, cam_offset):
         if not self._equipped_item: return
         weapon_surf = getattr(self._equipped_item, "get_char_weapon_surface", lambda: None)()
         if not weapon_surf: return
@@ -367,16 +388,18 @@ class Player:
         w, h = weapon_surf.get_size()
         weapon_surf = pygame.transform.smoothscale(weapon_surf, (int(w*SCALE), int(h*SCALE)))
 
-        player_center = pygame.Vector2(screen.get_rect().center)
+        # Weapon position based on player world position
+        player_screen_pos = self._pos - cam_offset
         mouse_pos = self._mouse_screen
-        direction = mouse_pos - player_center
+        direction = mouse_pos - player_screen_pos
         if direction.length() == 0: return
+
         angle = direction.angle_to(pygame.Vector2(1, 0))
         weapon = weapon_surf
         if direction.x < 0:
             weapon = pygame.transform.flip(weapon, True, False)
             angle += 180
         rotated = pygame.transform.rotate(weapon, angle)
-        offset = pygame.Vector2(20,20) if direction.x >=0 else pygame.Vector2(-20,20)
-        rect = rotated.get_rect(center=player_center + offset)
+        offset = pygame.Vector2(20, 20) if direction.x >= 0 else pygame.Vector2(-20, 20)
+        rect = rotated.get_rect(center=player_screen_pos + offset)
         screen.blit(rotated, rect)
