@@ -4,13 +4,11 @@ import math
 import random
 from animation import load_sheet_anim, DIRECTIONS
 
-
 # ==================================================
 #                   ANIMATOR
 # ==================================================
 class ZombieAnimator:
     """Handles zombie animations (Walk, Attack, Death)"""
-
     def __init__(self):
         self.state = "walk"
         self.direction = "front"
@@ -73,7 +71,6 @@ class ZombieAnimator:
     def get_image(self):
         return self.image
 
-
 # ==================================================
 #                     ZOMBIE
 # ==================================================
@@ -83,6 +80,7 @@ class Zombie:
         self._pos = pygame.Vector2(x, y)
         self._rect = pygame.Rect(0, 0, 128, 128)
         self._rect.center = self._pos
+
 
         self._max_health = 100
         self._health = self._max_health
@@ -107,10 +105,24 @@ class Zombie:
 
         self._knockback_velocity = pygame.Vector2()
         self._knockback_end_time = 0
-    
+
+    def get_position(self):
+        return self._pos
+
+    def get_rect(self):
+        width, height = 70, 115  # match your hitbox
+        pos = self.get_position()
+        return pygame.Rect(pos.x - width//2,
+                           pos.y - height//2 +9,
+                           width,
+                           height)
+
     def is_dead(self):
         """Returns True if zombie is dead."""
         return self._is_dead
+
+    def is_attacking(self):
+        return self._is_attacking and self.state == "attack"
 
     def take_damage(self, damage, knockback_dir=None, current_time=0):
         if self._is_dead:
@@ -139,8 +151,6 @@ class Zombie:
                     # fallback
                     random.choice(self.sound.zombie_death).play()
                 self._death_sound_played = True
-
-
 
     def update(self, player_pos, dt, current_time):
         if self._is_dead:
@@ -190,12 +200,20 @@ class Zombie:
         self._rect.center = self._pos
         return True
 
-
     def draw(self, screen, camera):
+        # Compute screen position from world position
         screen_pos = self._pos - camera.get_position()
+        
+        # Draw the sprite normally
         image = self.animator.get_image()
-        rect = image.get_rect(center=screen_pos)
-        screen.blit(image, rect)
+        image_rect = image.get_rect(center=screen_pos)
+        screen.blit(image, image_rect)
+
+        # Draw the **actual hitbox** (debug red rect)
+        hitbox_rect = self.get_rect()             # get the hitbox
+        hitbox_rect.topleft -= camera.get_position()  # adjust for camera
+        pygame.draw.rect(screen, (255, 0, 0), hitbox_rect, 2)
+        # Draw health bar
         self._draw_health_bar(screen, screen_pos)
 
     def _draw_health_bar(self, screen, pos):
@@ -209,19 +227,6 @@ class Zombie:
             (x, y, bar_w * (self._health / self._max_health), bar_h),
         )
         pygame.draw.rect(screen, (255, 255, 255), (x, y, bar_w, bar_h), 1)
-
-    def get_position(self):
-        return self._pos
-
-    def get_rect(self):
-        width, height = 50, 80  # match your hitbox
-        pos = self.get_position()
-        return pygame.Rect(pos.x - width//2, pos.y - height//2, width, height)
-
-
-    def is_attacking(self):
-        return self._is_attacking and self.state == "attack"
-
 
 # ==================================================
 #                 ZOMBIE SPAWNER
@@ -281,7 +286,6 @@ class ZombieSpawner:
         y = player_pos.y + math.sin(angle) * distance
 
         self.zombies.append(Zombie(x, y, self.sound))  # ✅ PASS SOUND
-
 
     def draw(self, screen, camera):
         for zombie in sorted(self.zombies, key=lambda z: z.get_position().y):

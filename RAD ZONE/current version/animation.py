@@ -56,7 +56,6 @@ def load_sheet_anim(path, frames_per_dir):
 
     return animations
 
-
 # ---------- ANIMATOR CLASS ----------
 class Animator:
     def __init__(self, assets_path):
@@ -71,7 +70,6 @@ class Animator:
         }
 
         self.image = self.animations["idle"]["front"][0]
-
 
     def update(self, velocity: pygame.Vector2, dt: float, current_time: float = 0, override_stab: bool = False):
         """Update animation frames"""
@@ -102,7 +100,6 @@ class Animator:
     def play_stab(self):
         self.state = "stab"
         self.frame_index = 0
-
 
     def get_image(self) -> pygame.Surface:
         return self.image

@@ -5,7 +5,7 @@ from animation import Animator
 from zombie import Zombie
 
 class Player:
-    DEBUG = True  # debug hitbox
+    DEBUG = False  # debug hitbox
 
     def __init__(self, surf, sound, pos=(0,0)):
         self._surf = surf

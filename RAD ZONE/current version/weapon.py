@@ -69,8 +69,6 @@ class Weapon:
 
         self._last_shot_time = 0
 
-
-
     def equip(self):
         pass  # 🔇 intentionally silent
 
@@ -83,7 +81,6 @@ class Weapon:
             self._last_shot_time = current_time
             return True
         return False
-
 
     def reload(self):
         pass  # 🔇 intentionally silent

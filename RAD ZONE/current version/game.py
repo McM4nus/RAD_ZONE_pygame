@@ -243,7 +243,7 @@ class Game:
                     exit()
 
                 if self._inventory and event.type == pygame.MOUSEWHEEL:
-                    if event.y > 0:
+                    if event.y < 0:
                         self._inventory.select_next()
                     else:
                         self._inventory.select_previous()
@@ -309,20 +309,20 @@ class Game:
 
 
             # DEBUG: visualize zombie hitboxes
-            if self._zombie_spawner:
-                for zombie in self._zombie_spawner.get_zombies():
-                    pos = zombie.get_position()  # world coordinates
-                    width, height = 50, 80      # adjust to match zombie size
+            # if self._zombie_spawner:
+            #     for zombie in self._zombie_spawner.get_zombies():
+            #         pos = zombie.get_position()  # world coordinates
+            #         width, height = 50, 80      # adjust to match zombie size
 
-                    # Convert to screen coordinates using camera
-                    screen_pos = pos - self._camera.get_position()
-                    rect = pygame.Rect(
-                        screen_pos.x - width // 2,
-                        screen_pos.y - height // 2,
-                        width,
-                        height
-                    )
-                    pygame.draw.rect(self._screen, (255, 0, 0), rect, 1)                   
+            #         # Convert to screen coordinates using camera
+            #         screen_pos = pos - self._camera.get_position()
+            #         rect = pygame.Rect(
+            #             screen_pos.x - width // 2,
+            #             screen_pos.y - height // 2,
+            #             width,
+            #             height
+            #         )
+            #         pygame.draw.rect(self._screen, (255, 0, 0), rect, 1)                   
 
             if self._ui:
                 self._ui.draw(
