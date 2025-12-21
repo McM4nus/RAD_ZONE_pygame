@@ -208,18 +208,35 @@ class Game:
         while True:
             if self.state == "MENU":
                 choice = self._menu.run()
+
                 if choice == "Quit":
+                    pygame.mixer.music.stop()  # stop menu music
                     pygame.quit()
                     exit()
+
                 elif choice == "Scoreboard":
                     Scoreboard(self._screen).run()
+                    # return to menu, music continues
                     continue
+
                 elif choice == "Play":
+                    pygame.mixer.music.stop()  # stop menu music before starting game
+                    Menu.current_music_file = None
                     self.start_game()
                     self.state = "PLAYING"
+
                 elif choice == "Credits":
                     from credits import CreditsScreen
                     CreditsScreen(self._screen).run()
+                    # after credits, return to menu, music continues
+                    continue
+
+                elif choice == "Settings":
+                    from settings import SettingsMenu
+                    SettingsMenu(self._screen, self.sound).run()
+
+                    # after settings, return to menu, music continues
+                    continue
 
             elif self.state == "PLAYING":
                 self._game_loop()

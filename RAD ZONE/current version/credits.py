@@ -52,7 +52,7 @@ class CreditsScreen:
 
         # Soundtrack starten vanaf bepaald punt, loopend
         pygame.mixer.init()
-        pygame.mixer.music.load("RAD ZONE\current version\MP3\RAD_ZONE_SOUNDTRACK.mp3")
+        pygame.mixer.music.load("RAD ZONE/current version/Audio/RAD_ZONE_SOUNDTRACK.wav")
         pygame.mixer.music.play(loops=-1, start=30)  # start op 30 seconden, herhaling oneindig
 
     # def draw(self):

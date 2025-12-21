@@ -63,20 +63,20 @@ class Menu:
         # Get rect centered
         self.bg_rect = self.background.get_rect(center=(self.width // 2, self.height // 2))
 
-        # -----------------------------
-        #   LOAD & START MUSIC
-        # -----------------------------
-        pygame.mixer.init()
-        pygame.mixer.music.load("RAD ZONE/current version/MP3/intro_loop.mp3")
-        pygame.mixer.music.set_volume(0.7)
-        start_second = 5
-        pygame.mixer.music.play(-1, start=start_second)
+        # # -----------------------------
+        # #   LOAD & START MUSIC
+        # # -----------------------------
+        # pygame.mixer.init()
+        # pygame.mixer.music.load("RAD ZONE/current version/Audio/intro_loop.wav")
+        # pygame.mixer.music.set_volume(0.7)
+        # start_second = 5
+        # pygame.mixer.music.play(-1, start=start_second)
 
         # -----------------------------
         #   CREATE BUTTONS
         # -----------------------------
         center_x = self.width // 2
-        start_y = 580
+        start_y = 530
         spacing = int(self.height * 0.06)
 
         font = pygame.font.Font(font_path, 48)
@@ -84,9 +84,12 @@ class Menu:
         self.buttons = {
             "Play": BoxButton("PLAY", (center_x, start_y + spacing * 0), size=(80, 60), font=font),
             "Scoreboard": BoxButton("SCOREBOARD", (center_x, start_y + spacing * 1), size=(180, 60),font=font),
-            "Credits": BoxButton("CREDITS", (center_x, start_y + spacing * 2), size=(130, 60),font=font),
-            "Quit": BoxButton("EXIT GAME", (center_x, start_y + spacing * 3), size=(150, 60),font=font),
+            "Settings": BoxButton("SETTINGS", (center_x, start_y + spacing * 2), size=(150, 60), font=font),
+            "Credits": BoxButton("CREDITS", (center_x, start_y + spacing * 3), size=(130, 60),font=font),
+            "Quit": BoxButton("EXIT GAME", (center_x, start_y + spacing * 4), size=(150, 60),font=font),
         }
+        
+        current_music_file = None
 
     # -----------------------------
     #           DRAW MENU
@@ -104,18 +107,40 @@ class Menu:
     #           RUN LOOP
     # -----------------------------
     def run(self):
+        # -----------------------------
+        #   LOAD & START MUSIC
+        # -----------------------------
+        menu_music = "RAD ZONE/current version/Audio/intro_loop.wav"
+
+        # Only load and play if either nothing is playing or a different file is loaded
+        if not pygame.mixer.music.get_busy() or Menu.current_music_file != menu_music:
+            pygame.mixer.init()
+            pygame.mixer.music.load(menu_music)
+            pygame.mixer.music.set_volume(0.7)
+            pygame.mixer.music.play(-1, start=5)
+            Menu.current_music_file = menu_music
+
         while True:
             self.draw()
-
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.mixer.music.stop()
                     pygame.quit()
                     sys.exit()
 
-                # Check button clicks
                 for name, btn in self.buttons.items():
                     if btn.handle_event(event):
                         if name == "Play":
-                            pygame.mixer.music.stop()  # Stop music
-                        return name
+                            pygame.mixer.music.stop()
+                            return "Play"
+                        elif name == "Settings":
+                            return "Settings"
+                        elif name == "Scoreboard":
+                            return "Scoreboard"
+                        elif name == "Credits":
+                            return "Credits"
+                        elif name == "Quit":
+                            pygame.mixer.music.stop()
+                            pygame.quit()
+                            sys.exit()
+

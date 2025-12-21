@@ -18,8 +18,9 @@ class PauseMenu:
         base = "RAD ZONE/UI/Menu/"
         button_width = w // 4
         self.buttons = {
-            "Resume": BoxButton("RESUME", (center_x, start_y), font=font),
-            "Quit": BoxButton("QUIT", (center_x, start_y + spacing), font=font),
+            "Resume": BoxButton("RESUME", (center_x, start_y), size=(180, 60), font=font),
+            "Settings": BoxButton("SETTINGS", (center_x, start_y + spacing * 1), size=(250, 60), font=font),
+            "Quit": BoxButton("QUIT", (center_x, start_y + spacing * 2), size=(130, 60), font=font),
         }
 
     def draw(self, game_surface):
@@ -43,6 +44,9 @@ class PauseMenu:
                     exit()
                 for name, btn in self.buttons.items():
                     if btn.handle_event(event):
-                        return name
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                    return "Resume"
+                        if name == "Resume":
+                            return "Resume"
+                        elif name == "Settings":
+                            return "Settings"  # Signal pause menu to open settings
+                        elif name == "Quit":
+                            return "Quit"
