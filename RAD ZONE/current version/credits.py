@@ -55,42 +55,6 @@ class CreditsScreen:
         pygame.mixer.music.load("RAD ZONE/current version/Audio/RAD_ZONE_SOUNDTRACK.wav")
         pygame.mixer.music.play(loops=-1, start=30)  # start op 30 seconden, herhaling oneindig
 
-    # def draw(self):
-    #     self.screen.blit(self.background, (0, 0))
-    #     y = self.start_y
-    #     prev_type = None
-
-    #     # Tekst tekenen
-    #     for typ, line in self.credits:
-    #         # Extra spatie tussen secties
-    #         if typ == "title" and prev_type == "text":
-    #             y += self.line_spacing_section
-
-    #         # Renderen
-    #         if typ == "title":
-    #             surf = self.title_font.render(line, True, (255, 255, 255))
-    #             y += self.line_spacing_title
-    #         else:
-    #             surf = self.text_font.render(line, True, (200, 200, 200))
-    #             y += self.line_spacing_text
-
-    #         rect = surf.get_rect(center=(self.width // 2, y))
-    #         self.screen.blit(surf, rect)
-    #         prev_type = typ
-
-    #     # Scroll positie update
-    #     self.start_y -= self.scroll_speed
-
-    #     # Reset scroll wanneer alles voorbij is
-    #     total_height = y + 100  # extra marge onderaan
-    #     if total_height < 0:
-    #         self.start_y = self.height
-
-    #     # Quit-knop tekenen
-    #     self.quit_btn.draw(self.screen)
-    #     pygame.display.flip()
-
-
     def draw(self):
         self.screen.blit(self.background, (0, 0))
         y = self.start_y
@@ -101,7 +65,7 @@ class CreditsScreen:
 
         for role, names in self.credits:
             # Draw role
-            role_surf = self.title_font.render(role, True, (255, 255, 255))
+            role_surf = self.title_font.render(role, True, (141, 251, 45))
             role_rect = role_surf.get_rect(topleft=(role_x, y))
             self.screen.blit(role_surf, role_rect)
 
