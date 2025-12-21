@@ -1,51 +1,39 @@
 import pygame
 import sys
+from ui import BoxButton
+import os
+
+# initialize pygame first
+
+pygame.init()  # ensure pygame is initialized
+
+# Build font path relative to this script
+# font_path = os.path.join(os.path.dirname(__file__), "Fonts", "undertow", "UNDERTOW.ttf")
+font_path = os.path.join(os.path.dirname(__file__), "Fonts", "darkmode", "darkmode demo-Regular.ttf")
+
+if os.path.exists(font_path):
+    font = pygame.font.Font(font_path, 48)
+else:
+    print("Font file not found! Using default system font.")
+    font = pygame.font.SysFont(None, 48)
 
 # -----------------------------
-#   SCALE FUNCTION
+#       HELPER FUNCTION
 # -----------------------------
-def scale_image(img, width=None, height=None):
-    """Schaalt een afbeelding met behoud van aspect ratio."""
-    if width is not None and height is None:
-        ratio = width / img.get_width()
-        height = int(img.get_height() * ratio)
-    if height is not None and width is None:
-        ratio = height / img.get_height()
-        width = int(img.get_width() * ratio)
-    return pygame.transform.scale(img, (width, height))
-
-
-# -----------------------------
-#   IMAGE BUTTON (NO HOVER)
-# -----------------------------
-class ImageButton:
-    def __init__(self, x, y, idle_img, pressed_img):
-        self.idle = idle_img
-        self.pressed = pressed_img
-        self.current = self.idle
-        self.rect = self.current.get_rect(center=(x, y))
-        self.is_down = False
-
-    def draw(self, screen):
-        screen.blit(self.current, self.rect)
-
-    def handle_event(self, event):
-        # MOUSE DOWN
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            if self.rect.collidepoint(event.pos):
-                self.current = self.pressed
-                self.is_down = True
-
-        # MOUSE UP
-        if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
-            if self.is_down:
-                self.current = self.idle
-                self.is_down = False
-                if self.rect.collidepoint(event.pos):
-                    return True  # CLICKED
-
-        return False
-
+def round_corners(image, radius):
+    """Return a copy of the image with rounded corners of given radius."""
+    size = image.get_size()
+    # Create a temporary surface with alpha
+    rounded_surf = pygame.Surface(size, pygame.SRCALPHA)
+    
+    # Draw a filled rounded rectangle
+    rect = pygame.Rect(0, 0, *size)
+    pygame.draw.rect(rounded_surf, (255, 255, 255, 255), rect, border_radius=radius)
+    
+    # Copy the image onto the rounded rectangle using BLEND_RGBA_MULT
+    rounded_surf.blit(image, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
+    
+    return rounded_surf
 
 # -----------------------------
 #            MENU
@@ -53,63 +41,63 @@ class ImageButton:
 class Menu:
     def __init__(self, screen, items):
         self.screen = screen
-        self.items = items  # ["Play", "Scoreboard", "Credits", "Quit"]
+        self.items = items  # ["Play", "Scoreboard", "Credits", "Exit Game"]
         self.width, self.height = self.screen.get_size()
 
-        # Achtergrond
+        # -----------------------------
+        #   LOAD BACKGROUND
+        # -----------------------------
         self.background = pygame.image.load(
             "RAD ZONE/UI/Menu/achtergrond menu.png"
-        ).convert()
-        self.background = pygame.transform.scale(self.background, (self.width, self.height))
+        ).convert_alpha()
+
+        # Scale to half size
+        orig_width, orig_height = self.background.get_size()
+        self.background = pygame.transform.scale(
+            self.background, (orig_width // 2, orig_height // 2)
+        )
+
+        # Apply rounded corners
+        self.background = round_corners(self.background, radius=30)
+
+        # Get rect centered
+        self.bg_rect = self.background.get_rect(center=(self.width // 2, self.height // 2))
 
         # -----------------------------
-        #   LAAD EN START MUZIEK
+        #   LOAD & START MUSIC
         # -----------------------------
         pygame.mixer.init()
         pygame.mixer.music.load("RAD ZONE/current version/MP3/intro_loop.mp3")
         pygame.mixer.music.set_volume(0.7)
-        start_second = 5  # Start vanaf 5 seconden
+        start_second = 5
         pygame.mixer.music.play(-1, start=start_second)
 
         # -----------------------------
-        #   LOAD & SCALE BUTTON IMAGES
-        # -----------------------------
-        base = "RAD ZONE/UI/Menu/"
-        button_width = self.width // 4  # 25% van schermbreedte
-
-        self.play_idle = scale_image(pygame.image.load(base + "play_idle.png").convert_alpha(), width=button_width)
-        self.play_pressed = scale_image(pygame.image.load(base + "play_pressed.png").convert_alpha(), width=button_width)
-
-        self.scoreboard_idle = scale_image(pygame.image.load(base + "scoreboard_idle.png").convert_alpha(), width=button_width)
-        self.scoreboard_pressed = scale_image(pygame.image.load(base + "scoreboard_pressed.png").convert_alpha(), width=button_width)
-
-        self.credits_idle = scale_image(pygame.image.load(base + "credits_idle.png").convert_alpha(), width=button_width)
-        self.credits_pressed = scale_image(pygame.image.load(base + "credits_pressed.png").convert_alpha(), width=button_width)
-
-        self.quit_idle = scale_image(pygame.image.load(base + "quit_idle.png").convert_alpha(), width=button_width)
-        self.quit_pressed = scale_image(pygame.image.load(base + "quit_pressed.png").convert_alpha(), width=button_width)
-
-        # -----------------------------
-        #   CREATE BUTTON OBJECTS
+        #   CREATE BUTTONS
         # -----------------------------
         center_x = self.width // 2
-        start_y = 350
-        spacing = int(self.height * 0.12)  # dynamische spacing
+        start_y = 580
+        spacing = int(self.height * 0.06)
+
+        font = pygame.font.Font(font_path, 48)
 
         self.buttons = {
-            "Play": ImageButton(center_x, start_y + spacing * 0, self.play_idle, self.play_pressed),
-            "Scoreboard": ImageButton(center_x, start_y + spacing * 1, self.scoreboard_idle, self.scoreboard_pressed),
-            "Credits": ImageButton(center_x, start_y + spacing * 2, self.credits_idle, self.credits_pressed),
-            "Quit": ImageButton(center_x, start_y + spacing * 3, self.quit_idle, self.quit_pressed),
+            "Play": BoxButton("PLAY", (center_x, start_y + spacing * 0), size=(80, 60), font=font),
+            "Scoreboard": BoxButton("SCOREBOARD", (center_x, start_y + spacing * 1), size=(180, 60),font=font),
+            "Credits": BoxButton("CREDITS", (center_x, start_y + spacing * 2), size=(130, 60),font=font),
+            "Quit": BoxButton("EXIT GAME", (center_x, start_y + spacing * 3), size=(150, 60),font=font),
         }
 
     # -----------------------------
     #           DRAW MENU
     # -----------------------------
     def draw(self):
-        self.screen.blit(self.background, (0, 0))
+        self.screen.fill((0, 0, 0))
+        self.screen.blit(self.background, self.bg_rect)
+
         for btn in self.buttons.values():
             btn.draw(self.screen)
+
         pygame.display.flip()
 
     # -----------------------------
@@ -129,5 +117,5 @@ class Menu:
                 for name, btn in self.buttons.items():
                     if btn.handle_event(event):
                         if name == "Play":
-                            pygame.mixer.music.stop()  # Stop muziek bij Play
+                            pygame.mixer.music.stop()  # Stop music
                         return name

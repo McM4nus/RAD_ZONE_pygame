@@ -1,6 +1,8 @@
 import pygame
 import json
 from sys import exit
+from ui import BoxButton
+
 
 class CommitScoreScreen:
     def __init__(self, screen, score):

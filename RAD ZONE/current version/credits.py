@@ -1,6 +1,7 @@
 import pygame
 from sys import exit
-from hoofdscherm import ImageButton, scale_image
+from ui import BoxButton
+
 
 class CreditsScreen:
     def __init__(self, screen):
@@ -18,32 +19,21 @@ class CreditsScreen:
 
         # Credits tekst (type, line)
         self.credits = [
-            ("title", "The team behind Rad zone:"),
-            ("text", "Keanu Aleart"),
-            ("text", "Manu De Smedt"),
-            ("text", "Esper Merckx"),
-            ("text", "Michiel Vanmossevelde"),
-            ("text", "Wouter Wingels"),
-            ("title", "Verdeling taken from projectweek:"),
-            ("text", "Graphic Design: Michiel, Esper, Keanu"),
-            ("text", "Programming: Wouter, Keanu, Manu, Esper, Michiel"),
-            ("text", "Soundtrack Design: Manu, Michiel"),
-            ("text", "Sound Design: Manu"),
-            ("text", "Voice Acting: Esper, Wouter, Keanu, Manu, Michiel"),
-            ("title", "Websites that helped us:"),
-            ("title", "Sound effects:"),
-            ("text", "pixabay.com"),
-            ("title", "Sprites: (Itch.io)"),
-            ("text", "Goncharov_Denis"),
-            ("text", "ArcadeIsland"),
-            ("text", "RanitayaStudio"),
-            ("text", "JackBurton84"),
-            ("text", "CraftPix.net"),
-            ("title", "Gen AI"),
-            ("text", "ChatGPT"),
-            ("text", "Gemini AI"),
-            ("text", "Microsoft copilot"),
+            ("The team behind Rad zone:", ["Keanu Aleart", "Manu De Smedt", "Esper Merckx", "Michiel Vanmossevelde", "Wouter Wingels"]),
+            ("Verdeling taken voor projectweek:", "" ),
+            ("Graphic Design:", ["Michiel", "Esper", "Keanu"]),
+            ("Programming:", ["Wouter", "Keanu", "Manu", "Esper", "Michiel"]),
+            ("Soundtrack:", ["Manu", "Michiel"]),
+            ("Sound Design:", ["Manu"]),
+            ("Voice Acting:", ["Esper", "Wouter", "Keanu", "Manu", "Michiel"]),
+            ("Websites that helped us:", ""),
+            ("Sound effects:", ["pixabay.com"]),
+            ("Sprites:",  ["(Itch.io)", "Goncharov_Denis", "ArcadeIsland", "RanitayaStudio", "JackBurton84", "CraftPix.net"]),
+            ("Gen AI", ["ChatGPT", "Gemini AI", "Microsoft copilot"]),
         ]
+
+
+
 
         # Scroll instellingen
         self.start_y = self.height
@@ -52,50 +42,98 @@ class CreditsScreen:
         self.line_spacing_text = 40
         self.line_spacing_section = 100
 
-        # Quit-knop PNG
-        base_path = "RAD ZONE/UI/Menu/"
-        button_width = self.width // 6
-        idle_img = scale_image(pygame.image.load(base_path + "return_idle.png").convert_alpha(), width=button_width)
-        pressed_img = scale_image(pygame.image.load(base_path + "return_pressed.png").convert_alpha(), width=button_width)
-        self.quit_btn = ImageButton(self.width // 2, self.height - 50, idle_img, pressed_img)
+        font = pygame.font.Font("RAD ZONE/UI/Menu/edit-undo.brk.ttf", 40)
+        self.quit_btn = BoxButton(
+            "RETURN",
+            (self.width // 2, self.height -1000),
+            size=(250, 60),
+            font=font
+        )
 
         # Soundtrack starten vanaf bepaald punt, loopend
         pygame.mixer.init()
         pygame.mixer.music.load("RAD ZONE\current version\MP3\RAD_ZONE_SOUNDTRACK.mp3")
         pygame.mixer.music.play(loops=-1, start=30)  # start op 30 seconden, herhaling oneindig
 
+    # def draw(self):
+    #     self.screen.blit(self.background, (0, 0))
+    #     y = self.start_y
+    #     prev_type = None
+
+    #     # Tekst tekenen
+    #     for typ, line in self.credits:
+    #         # Extra spatie tussen secties
+    #         if typ == "title" and prev_type == "text":
+    #             y += self.line_spacing_section
+
+    #         # Renderen
+    #         if typ == "title":
+    #             surf = self.title_font.render(line, True, (255, 255, 255))
+    #             y += self.line_spacing_title
+    #         else:
+    #             surf = self.text_font.render(line, True, (200, 200, 200))
+    #             y += self.line_spacing_text
+
+    #         rect = surf.get_rect(center=(self.width // 2, y))
+    #         self.screen.blit(surf, rect)
+    #         prev_type = typ
+
+    #     # Scroll positie update
+    #     self.start_y -= self.scroll_speed
+
+    #     # Reset scroll wanneer alles voorbij is
+    #     total_height = y + 100  # extra marge onderaan
+    #     if total_height < 0:
+    #         self.start_y = self.height
+
+    #     # Quit-knop tekenen
+    #     self.quit_btn.draw(self.screen)
+    #     pygame.display.flip()
+
+
     def draw(self):
         self.screen.blit(self.background, (0, 0))
         y = self.start_y
-        prev_type = None
 
-        # Tekst tekenen
-        for typ, line in self.credits:
-            # Extra spatie tussen secties
-            if typ == "title" and prev_type == "text":
-                y += self.line_spacing_section
+        role_x = 300                    # Left-aligned role column
+        name_x = self.width // 2 * 1.3       # Start x-position for names
+        role_name_spacing = 20         # Space between role and first name
 
-            # Renderen
-            if typ == "title":
-                surf = self.title_font.render(line, True, (255, 255, 255))
-                y += self.line_spacing_title
-            else:
-                surf = self.text_font.render(line, True, (200, 200, 200))
+        for role, names in self.credits:
+            # Draw role
+            role_surf = self.title_font.render(role, True, (255, 255, 255))
+            role_rect = role_surf.get_rect(topleft=(role_x, y))
+            self.screen.blit(role_surf, role_rect)
+
+            # Draw first name on the same line as role
+            if names:
+                first_name_surf = self.text_font.render(names[0], True, (200, 200, 200))
+                first_name_rect = first_name_surf.get_rect(topleft=(name_x, y))
+                self.screen.blit(first_name_surf, first_name_rect)
+
+                # Move y down for subsequent names
                 y += self.line_spacing_text
 
-            rect = surf.get_rect(center=(self.width // 2, y))
-            self.screen.blit(surf, rect)
-            prev_type = typ
+                for name in names[1:]:
+                    name_surf = self.text_font.render(name, True, (200, 200, 200))
+                    name_rect = name_surf.get_rect(topleft=(name_x, y))
+                    self.screen.blit(name_surf, name_rect)
+                    y += self.line_spacing_text
+            else:
+                y += self.line_spacing_text  # no names, still add spacing
 
-        # Scroll positie update
+            # Extra spacing between roles
+            y += self.line_spacing_section
+
+        # Scroll
         self.start_y -= self.scroll_speed
 
-        # Reset scroll wanneer alles voorbij is
-        total_height = y + 100  # extra marge onderaan
+        # Reset scroll if all text has gone
+        total_height = y + 100
         if total_height < 0:
             self.start_y = self.height
 
-        # Quit-knop tekenen
+        # Draw quit button
         self.quit_btn.draw(self.screen)
         pygame.display.flip()
 

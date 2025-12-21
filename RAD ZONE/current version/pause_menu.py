@@ -1,5 +1,6 @@
 import pygame
-from hoofdscherm import ImageButton, scale_image
+from ui import BoxButton
+
 
 class PauseMenu:
     def __init__(self, screen):
@@ -7,20 +8,19 @@ class PauseMenu:
         w, h = self.screen.get_size()
         self.width, self.height = w, h
 
-        # Knoppen laden
-        base = "RAD ZONE/UI/Menu/"
-        button_width = w // 4
-        self.buttons = {}
-
-        button_names = ["Resume", "Quit"]
         start_y = 250
         spacing = int(h * 0.12)
         center_x = w // 2
 
-        for i, name in enumerate(button_names):
-            idle = scale_image(pygame.image.load(base + f"{name.lower()}_idle.png").convert_alpha(), width=button_width)
-            pressed = scale_image(pygame.image.load(base + f"{name.lower()}_pressed.png").convert_alpha(), width=button_width)
-            self.buttons[name] = ImageButton(center_x, start_y + spacing * i, idle, pressed)
+        font = pygame.font.Font("RAD ZONE/UI/Menu/edit-undo.brk.ttf", 48)
+
+        # Knoppen laden
+        base = "RAD ZONE/UI/Menu/"
+        button_width = w // 4
+        self.buttons = {
+            "Resume": BoxButton("RESUME", (center_x, start_y), font=font),
+            "Quit": BoxButton("QUIT", (center_x, start_y + spacing), font=font),
+        }
 
     def draw(self, game_surface):
         # Grijs overlay

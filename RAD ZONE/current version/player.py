@@ -379,6 +379,11 @@ class Player:
                 3
             )
 
+        # --- DEBUG: Player_hitbox ---
+        debug_rect = self._rect.copy()
+        debug_rect.topleft -= cam_offset  # world -> screen
+        pygame.draw.rect(screen, (255, 0, 0), debug_rect, 2)
+
     def draw_weapon(self, screen, cam_offset):
         if not self._equipped_item: return
         weapon_surf = getattr(self._equipped_item, "get_char_weapon_surface", lambda: None)()

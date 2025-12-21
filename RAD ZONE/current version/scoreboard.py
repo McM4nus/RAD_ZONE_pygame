@@ -2,50 +2,55 @@ import pygame
 import sys
 import json
 import os
+from ui import BoxButton
 
+# -----------------------------
+#       HELPER FUNCTION
+# -----------------------------
+def round_corners(image, radius):
+    """Return a copy of the image with rounded corners of given radius."""
+    size = image.get_size()
+    rounded_surf = pygame.Surface(size, pygame.SRCALPHA)
+    rect = pygame.Rect(0, 0, *size)
+    pygame.draw.rect(rounded_surf, (255, 255, 255, 255), rect, border_radius=radius)
+    rounded_surf.blit(image, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
+    return rounded_surf
 
+# -----------------------------
+#        SCOREBOARD CLASS
+# -----------------------------
 class Scoreboard:
     def __init__(self, screen, score_file="scores.json"):
         self.screen = screen
         self.width, self.height = screen.get_size()
         self.score_file = score_file
 
-        # Achtergrond
+        # Load scores
+        self.load_scores()
+
+        # Load and scale background
         self.background = pygame.image.load(
             "RAD ZONE/UI/Menu/achtergrond_scoreboard.png"
-        ).convert()
-        self.background = pygame.transform.scale(self.background, (self.width, self.height))
+        ).convert_alpha()  # preserve transparency
+        orig_width, orig_height = self.background.get_size()
+        self.background = pygame.transform.scale(
+            self.background, (orig_width // 2, orig_height // 2)
+        )
+        # Apply rounded corners
+        self.background = round_corners(self.background, radius=30)
+        # Centered rect
+        self.bg_rect = self.background.get_rect(center=(self.width // 2, self.height // 2))
 
         # Font
         pygame.font.init()
         self.font = pygame.font.Font("RAD ZONE/UI/Menu/edit-undo.brk.ttf", 60)
 
-        # Return knop afbeeldingen
-        self.return_idle = pygame.image.load("RAD ZONE/UI/Menu/return_idle.png").convert_alpha()
-        self.return_pressed = pygame.image.load("RAD ZONE/UI/Menu/return_pressed.png").convert_alpha()
+        # Return button
+        self.return_btn = BoxButton("RETURN", (self.width // 2, self.height - 100), font=self.font)
 
-        # Schaal zoals je menu-knoppen (1/6 van schermbreedte)
-        button_width = self.width // 6
-
-        def scale_button(img):
-            ratio = button_width / img.get_width()
-            new_height = int(img.get_height() * ratio)
-            return pygame.transform.scale(img, (button_width, new_height))
-
-        self.return_idle = scale_button(self.return_idle)
-        self.return_pressed = scale_button(self.return_pressed)
-
-        self.return_btn = {
-            "idle": self.return_idle,
-            "pressed": self.return_pressed,
-            "current": self.return_idle,
-            "rect": self.return_idle.get_rect(center=(self.width // 2, self.height - 120)),
-            "down": False
-        }
-
-        # Laad scores
-        self.load_scores()
-
+    # -----------------------------
+    #   LOAD SCORES
+    # -----------------------------
     def load_scores(self):
         if not os.path.exists(self.score_file):
             self.scores = []
@@ -57,42 +62,20 @@ class Scoreboard:
             except json.JSONDecodeError:
                 self.scores = []
 
-        # Sorteer aflopend op score
+        # Sort descending and keep top 10
         self.scores.sort(key=lambda x: x["score"], reverse=True)
-        # Beperk tot top 10
         self.scores = self.scores[:10]
-
-    # -----------------------------
-    #   BUTTON HANDLING
-    # -----------------------------
-    def draw_button(self, btn):
-        self.screen.blit(btn["current"], btn["rect"])
-
-    def handle_button(self, btn, event):
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            if btn["rect"].collidepoint(event.pos):
-                btn["current"] = btn["pressed"]
-                btn["down"] = True
-
-        if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
-            if btn["down"]:
-                btn["current"] = btn["idle"]
-                btn["down"] = False
-
-                if btn["rect"].collidepoint(event.pos):
-                    return True
-        return False
 
     # -----------------------------
     #   DRAW
     # -----------------------------
     def draw(self):
-        self.screen.blit(self.background, (0, 0))
+        self.screen.fill((0, 0, 0))  # clear screen
+        self.screen.blit(self.background, self.bg_rect)
 
-        # Scores
-        start_y = 300
+        # Draw scores
+        start_y = 400
         spacing = 70
-
         for i, entry in enumerate(self.scores):
             name = entry.get("name", "Unknown")
             score = entry.get("score", 0)
@@ -101,8 +84,8 @@ class Scoreboard:
             rect = label.get_rect(center=(self.width // 2, start_y + i * spacing))
             self.screen.blit(label, rect)
 
-        # Return knop
-        self.draw_button(self.return_btn)
+        # Draw return button
+        self.return_btn.draw(self.screen)
 
         pygame.display.flip()
 
@@ -112,11 +95,10 @@ class Scoreboard:
     def run(self):
         while True:
             self.draw()
-
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
 
-                if self.handle_button(self.return_btn, event):
-                    return  # terug naar hoofdmenu
+                if self.return_btn.handle_event(event):
+                    return
