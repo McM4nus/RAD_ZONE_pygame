@@ -96,13 +96,13 @@ class Audio_Menu:
             "Player": Slider((center_x, start_y + spacing * 5), 300, 0, 100, int(self.sound_manager.player_volume * 100)),
         }
 
-        font = pygame.font.Font("RAD ZONE/UI/Menu/edit-undo.brk.ttf", 48)
+        font = pygame.font.Font("RAD ZONE/current version/Fonts/Sixtyfour-Regular-VariableFont_BLED,SCAN.ttf", 24)
         self.back_button = BoxButton("BACK", (center_x, start_y + spacing * 6.5), size=(150, 60), font=font)
 
     def draw(self):
         self.screen.blit(self.background, (0, 0))
 
-        font = pygame.font.Font("RAD ZONE/UI/Menu/edit-undo.brk.ttf", 36)
+        font = pygame.font.Font("RAD ZONE/current version/Fonts/BitcountGridSingle_Roman-SemiBold.ttf", 24)
         for name, slider in self.sliders.items():
             slider.draw(self.screen)
             label = font.render(f"{name}: {slider.value}", True, (255, 255, 255))

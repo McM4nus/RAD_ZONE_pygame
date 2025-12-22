@@ -92,11 +92,11 @@ class BoxButton:
 
         # Draw button background
         temp_surf = pygame.Surface(self.rect.size, pygame.SRCALPHA)
-        pygame.draw.rect(temp_surf, color, temp_surf.get_rect(), border_radius=8)
+        pygame.draw.rect(temp_surf, color, temp_surf.get_rect(), border_radius=25)
 
         # Draw border if needed
         if self.border_width > 0:
-            pygame.draw.rect(temp_surf, self.border_color, temp_surf.get_rect(), self.border_width, border_radius=8)
+            pygame.draw.rect(temp_surf, self.border_color, temp_surf.get_rect(), self.border_width, border_radius=25)
 
         # Blit background
         screen.blit(temp_surf, self.rect.topleft)

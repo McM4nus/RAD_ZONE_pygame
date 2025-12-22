@@ -1,18 +1,23 @@
 import pygame
 import sys
 from ui import BoxButton
-import os
+from pathlib import Path
 
-# initialize pygame first
+# -----------------------------
+#        INITIALIZATION
+# -----------------------------
+pygame.init()
 
-pygame.init()  # ensure pygame is initialized
+# Base directory (folder this file is in)
+BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Build font path relative to this script
-# font_path = os.path.join(os.path.dirname(__file__), "Fonts", "undertow", "UNDERTOW.ttf")
-font_path = os.path.join(os.path.dirname(__file__), "Fonts", "darkmode", "darkmode demo-Regular.ttf")
+# -----------------------------
+#        FONT SETUP
+# -----------------------------
+FONT_PATH = BASE_DIR / "current version" / "Fonts" / "Sixtyfour-Regular-VariableFont_BLED,SCAN.ttf"
 
-if os.path.exists(font_path):
-    font = pygame.font.Font(font_path, 48)
+if FONT_PATH.exists():
+    font = pygame.font.Font(str(FONT_PATH), 36)
 else:
     print("Font file not found! Using default system font.")
     font = pygame.font.SysFont(None, 48)
@@ -23,64 +28,63 @@ else:
 def round_corners(image, radius):
     """Return a copy of the image with rounded corners of given radius."""
     size = image.get_size()
-    # Create a temporary surface with alpha
     rounded_surf = pygame.Surface(size, pygame.SRCALPHA)
-    
-    # Draw a filled rounded rectangle
+
     rect = pygame.Rect(0, 0, *size)
-    pygame.draw.rect(rounded_surf, (255, 255, 255, 255), rect, border_radius=radius)
-    
-    # Copy the image onto the rounded rectangle using BLEND_RGBA_MULT
+    pygame.draw.rect(
+        rounded_surf,
+        (255, 255, 255, 255),
+        rect,
+        border_radius=radius
+    )
+
     rounded_surf.blit(image, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
-    
     return rounded_surf
 
 # -----------------------------
 #            MENU
 # -----------------------------
 class Menu:
+    current_music_file = None
+
     def __init__(self, screen, items):
         self.screen = screen
-        self.items = items  # ["Play", "Scoreboard", "Credits", "Exit Game"]
+        self.items = items
         self.width, self.height = self.screen.get_size()
 
         # -----------------------------
         #   LOAD BACKGROUND
         # -----------------------------
-        self.background = pygame.image.load(
-            "RAD ZONE/UI/Menu/achtergrond menu.png"
-        ).convert_alpha()
+        background_path = BASE_DIR / "UI" / "Menu" / "achtergrond menu.png"
+        self.background = pygame.image.load(str(background_path)).convert_alpha()
 
-        # Scale to half size
         orig_width, orig_height = self.background.get_size()
         self.background = pygame.transform.scale(
-            self.background, (orig_width // 2, orig_height // 2)
+            self.background,
+            (orig_width // 2, orig_height // 2)
         )
 
-        # Apply rounded corners
         self.background = round_corners(self.background, radius=30)
-
-        # Get rect centered
-        self.bg_rect = self.background.get_rect(center=(self.width // 2, self.height // 2))
+        self.bg_rect = self.background.get_rect(
+            center=(self.width // 2, self.height // 2)
+        )
 
         # -----------------------------
         #   CREATE BUTTONS
         # -----------------------------
         center_x = self.width // 2
-        start_y = 530
-        spacing = int(self.height * 0.06)
+        start_y = 550
+        spacing = int(self.height * 0.04)
 
-        font = pygame.font.Font(font_path, 48)
+        menu_font = pygame.font.Font(str(FONT_PATH), 24) if FONT_PATH.exists() else pygame.font.SysFont(None, 48)
 
         self.buttons = {
-            "Play": BoxButton("PLAY", (center_x, start_y + spacing * 0), size=(80, 45), font=font),
-            "Scoreboard": BoxButton("SCOREBOARD", (center_x, start_y + spacing * 1), size=(180, 45),font=font),
-            "Settings": BoxButton("SETTINGS", (center_x, start_y + spacing * 2), size=(150, 45), font=font),
-            "Credits": BoxButton("CREDITS", (center_x, start_y + spacing * 3), size=(130, 45),font=font),
-            "Quit": BoxButton("EXIT GAME", (center_x, start_y + spacing * 4), size=(150, 45),font=font),
+            "Play": BoxButton("PLAY", (center_x, start_y + spacing * 0), size=(95, 35), font=menu_font),
+            "Scoreboard": BoxButton("SCOREBOARD", (center_x, start_y + spacing * 1), size=(240, 35), font=menu_font),
+            "Settings": BoxButton("SETTINGS", (center_x, start_y + spacing * 2), size=(190, 35), font=menu_font),
+            "Credits": BoxButton("CREDITS", (center_x, start_y + spacing * 3), size=(170, 35), font=menu_font),
+            "Quit": BoxButton("EXIT", (center_x, start_y + spacing * 4), size=(105, 35), font=menu_font),
         }
-        
-        current_music_file = None
 
     # -----------------------------
     #           DRAW MENU
@@ -98,21 +102,21 @@ class Menu:
     #           RUN LOOP
     # -----------------------------
     def run(self):
-        # -----------------------------
-        #   LOAD & START MUSIC
-        # -----------------------------
-        menu_music = "RAD ZONE/current version/Audio/intro_loop.wav"
+        menu_music = BASE_DIR / "current version" / "Audio" / "intro_loop.wav"
 
-        # Only load and play if either nothing is playing or a different file is loaded
-        if not pygame.mixer.music.get_busy() or Menu.current_music_file != menu_music:
+        if (
+            not pygame.mixer.music.get_busy()
+            or Menu.current_music_file != menu_music
+        ):
             pygame.mixer.init()
-            pygame.mixer.music.load(menu_music)
+            pygame.mixer.music.load(str(menu_music))
             pygame.mixer.music.set_volume(0.7)
             pygame.mixer.music.play(-1, start=5)
             Menu.current_music_file = menu_music
 
         while True:
             self.draw()
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.mixer.music.stop()
@@ -134,4 +138,3 @@ class Menu:
                             pygame.mixer.music.stop()
                             pygame.quit()
                             sys.exit()
-

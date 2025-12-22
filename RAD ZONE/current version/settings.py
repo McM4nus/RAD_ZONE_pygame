@@ -31,15 +31,15 @@ class SettingsMenu:
             self.bg_rect = self.background.get_rect(center=(self.width // 2, self.height // 2))
 
         # Buttons
-        start_y = 500
-        spacing = int(self.height * 0.07)
+        start_y = 600
+        spacing = int(self.height * 0.04)
         center_x = self.width // 2
-        font = pygame.font.Font("RAD ZONE/UI/Menu/edit-undo.brk.ttf", 48)
+        font = pygame.font.Font("RAD ZONE/current version/Fonts/Sixtyfour-Regular-VariableFont_BLED,SCAN.ttf", 24)
 
         self.buttons = {
-            "Audio": BoxButton("AUDIO", (center_x, start_y), size=(140, 60), font=font),
-            "Controls": BoxButton("CONTROLS", (center_x, start_y + spacing), size=(210, 60), font=font),
-            "Back": BoxButton("BACK", (center_x, start_y + spacing*2), size=(130, 60), font=font),
+            "Audio": BoxButton("AUDIO", (center_x, start_y), size=(120, 35), font=font),
+            "Controls": BoxButton("CONTROLS", (center_x, start_y + spacing), size=(185, 35), font=font),
+            "Back": BoxButton("BACK", (center_x, start_y + spacing*2), size=(95, 35), font=font),
         }
 
     def round_corners(self, image, radius):

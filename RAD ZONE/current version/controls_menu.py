@@ -16,19 +16,19 @@ class ControlsMenu:
             self.background.fill((0, 0, 0))
 
         # Title font
-        self.title_font = pygame.font.Font("RAD ZONE/UI/Menu/edit-undo.brk.ttf", 72)
+        self.title_font = pygame.font.Font("RAD ZONE/current version/Fonts/Sixtyfour-Regular-VariableFont_BLED,SCAN.ttf", 72)
         self.title_surf = self.title_font.render("CONTROLS", True, (141, 251, 45))
         self.title_rect = self.title_surf.get_rect(center=(self.width // 2, 100))
 
         # Text font
-        self.text_font = pygame.font.Font("RAD ZONE/UI/Menu/edit-undo.brk.ttf", 48)
+        self.text_font = pygame.font.Font("RAD ZONE/current version/Fonts/BitcountGridSingle_Roman-SemiBold.ttf", 48)
 
         # Buttons
-        font = pygame.font.Font("RAD ZONE/UI/Menu/edit-undo.brk.ttf", 48)
+        font = pygame.font.Font("RAD ZONE/current version/Fonts/Sixtyfour-Regular-VariableFont_BLED,SCAN.ttf", 24)
         self.back_btn = BoxButton(
             "BACK", 
             (self.width // 2, self.height - 100), 
-            size=(200, 60), 
+            size=(150, 60), 
             font=font
         )
 
