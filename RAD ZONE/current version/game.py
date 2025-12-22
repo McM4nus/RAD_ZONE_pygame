@@ -30,18 +30,18 @@ class Game:
     def __init__(self):
         pygame.init()
         pygame.mixer.init()
-        pygame.mixer.set_num_channels(32)
 
         self._screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
         pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_CROSSHAIR)
 
         self._clock = pygame.time.Clock()
         self.sound = SoundManager()
+
         self._menu = Menu(
             self._screen,
-            ["Play", "Scoreboard", "Settings", "Credits", "Quit"]
+            ["Play", "Scoreboard", "Settings", "Credits", "Quit"],
+            self.sound
         )
-
         self.state = "MENU"
 
         self._player = None
@@ -52,36 +52,35 @@ class Game:
         self._zombie_spawner = None
         self._minimap = None
 
+        # ---------------- GET SCREEN SIZE, WIDTH & HEIGHT ----------------
         w, h = self._screen.get_size()
 
+        # ---------------- LOAD IMAGES ----------------
         self.map_surf, _ = ImageLoader.load(
             "RAD ZONE/current version/Graphics/Final map game.png",
             size=(7680, 6400)
         )
-
         self.char_surf, self.char_rect = ImageLoader.load(
             "RAD ZONE/current version/Graphics/AChar.png",
             size=(150, 150),
             center=(3840, 3200)
         )
-
         self.health = ImageLoader.load(
             "RAD ZONE/current version/Graphics/Health-bar.png",
             size=(512, 35),
             center=(260, 30)
         )
-
         self.stamina = ImageLoader.load(
             "RAD ZONE/current version/Graphics/Stamina-bar.png",
             size=(512, 35),
             center=(260, 70)
         )
-
         self.outline = ImageLoader.load(
             "RAD ZONE/current version/Graphics/Border-bar.png",
             size=(512, 35)
         )
 
+        # ----------------LOAD BUILDINGS ----------------
         self.buildings = [
             load_building("RAD ZONE/current version/Graphics/building 7 V2.png", (400, 768), 763, 515),
             load_building("RAD ZONE/current version/Graphics/building 7 V3.png", (400, 768), 1150, 515),
@@ -184,10 +183,11 @@ class Game:
     def run(self):
         while True:
             if self.state == "MENU":
+                # Pass SoundManager to menu so it can handle music
                 choice = self._menu.run()
 
                 if choice == "Quit":
-                    pygame.mixer.music.stop()
+                    self.sound.stop_music()
                     pygame.quit()
                     sys.exit()
 
@@ -196,8 +196,7 @@ class Game:
                     continue
 
                 elif choice == "Play":
-                    pygame.mixer.music.stop()
-                    Menu.current_music_file = None
+                    self.sound.stop_music()
                     self.start_game()
                     self.state = "PLAYING"
 
@@ -216,7 +215,6 @@ class Game:
 
             elif self.state == "DEAD":
                 self._death_loop()
-
 
     # ---------------- GAMEPLAY LOOP ----------------
     def _game_loop(self):
@@ -341,7 +339,6 @@ class Game:
                 return
 
             pygame.display.flip()
-
 
     # ---------------- KNIFE LOGIC ----------------
     def _handle_attack(self, current_time, player_pos):

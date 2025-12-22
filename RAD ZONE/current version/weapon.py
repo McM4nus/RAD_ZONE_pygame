@@ -1,3 +1,5 @@
+import pygame
+
 class Weapon:
     def __init__(self, id, sound_manager):
         self.id = id                  # the ID string like "shotgun"
@@ -68,6 +70,30 @@ class Weapon:
         self.spread = stats.get("spread", 0)
 
         self._last_shot_time = 0
+
+        # --- Weapon-specific scale and offset ---
+        weapon_scales = {
+            "knife": 0.5,
+            "pistol": 0.4,
+            "revolver": 0.45,
+            "shotgun": 0.8,
+            "crossbow": 0.75,
+            "machine_gun": 0.6
+        }
+
+        weapon_offsets = {
+            "knife": pygame.Vector2(10, 15),
+            "pistol": pygame.Vector2(15, 20),
+            "revolver": pygame.Vector2(18, 20),
+            "shotgun": pygame.Vector2(30, 25),
+            "crossbow": pygame.Vector2(25, 20),
+            "machine_gun": pygame.Vector2(25, 20)
+        }
+
+        # Assign them to the weapon instance
+        self.scale = weapon_scales.get(id, 0.6)
+        self.offset = weapon_offsets.get(id, pygame.Vector2(20, 20))
+
 
     def equip(self):
         pass  # 🔇 intentionally silent

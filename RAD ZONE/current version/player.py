@@ -380,26 +380,40 @@ class Player:
         # pygame.draw.rect(screen, (255, 0, 0), debug_rect, 2)
 
     def draw_weapon(self, screen, cam_offset):
-        if not self._equipped_item: return
-        weapon_surf = getattr(self._equipped_item, "get_char_weapon_surface", lambda: None)()
-        if not weapon_surf: return
+        if not self._equipped_item:
+            return
 
-        SCALE = 0.6
+        weapon_surf = getattr(self._equipped_item, "get_char_weapon_surface", lambda: None)()
+        if not weapon_surf:
+            return
+
+        # --- Weapon-specific scale (default to 0.6 if not defined) ---
+        SCALE = getattr(self._equipped_item, "scale", 0.6)
         w, h = weapon_surf.get_size()
-        weapon_surf = pygame.transform.smoothscale(weapon_surf, (int(w*SCALE), int(h*SCALE)))
+        weapon_surf = pygame.transform.smoothscale(weapon_surf, (int(w * SCALE), int(h * SCALE)))
 
         # Weapon position based on player world position
         player_screen_pos = self._pos - cam_offset
         mouse_pos = self._mouse_screen
         direction = mouse_pos - player_screen_pos
-        if direction.length() == 0: return
+        if direction.length() == 0:
+            return
 
+        # Determine rotation angle
         angle = direction.angle_to(pygame.Vector2(1, 0))
         weapon = weapon_surf
+
+        # Flip weapon if pointing left
         if direction.x < 0:
             weapon = pygame.transform.flip(weapon, True, False)
             angle += 180
+
         rotated = pygame.transform.rotate(weapon, angle)
-        offset = pygame.Vector2(20, 20) if direction.x >= 0 else pygame.Vector2(-20, 20)
+
+        # Optional: weapon-specific offset (default if not defined)
+        offset = getattr(self._equipped_item, "offset", pygame.Vector2(20, 20))
+        if direction.x < 0:
+            offset = pygame.Vector2(-offset.x, offset.y)
+
         rect = rotated.get_rect(center=player_screen_pos + offset)
         screen.blit(rotated, rect)

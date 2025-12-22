@@ -2,6 +2,7 @@ import pygame
 import sys
 from ui import BoxButton
 from pathlib import Path
+from sound_manager import SoundManager
 
 # -----------------------------
 #        INITIALIZATION
@@ -45,11 +46,10 @@ def round_corners(image, radius):
 #            MENU
 # -----------------------------
 class Menu:
-    current_music_file = None
-
-    def __init__(self, screen, items):
+    def __init__(self, screen, items, sound_manager):
         self.screen = screen
         self.items = items
+        self.sound = sound_manager
         self.width, self.height = self.screen.get_size()
 
         # -----------------------------
@@ -102,31 +102,26 @@ class Menu:
     #           RUN LOOP
     # -----------------------------
     def run(self):
-        menu_music = BASE_DIR / "current version" / "Audio" / "intro_loop.wav"
+        menu_music = BASE_DIR / "current version" / "Audio" / "intro_loop_3.wav"
 
-        if (
-            not pygame.mixer.music.get_busy()
-            or Menu.current_music_file != menu_music
-        ):
-            pygame.mixer.init()
-            pygame.mixer.music.load(str(menu_music))
-            pygame.mixer.music.set_volume(0.7)
-            pygame.mixer.music.play(-1, start=5)
-            Menu.current_music_file = menu_music
+        # Play menu music ONCE via SoundManager
+        if not pygame.mixer.music.get_busy():
+            self.sound.play_music(menu_music, loop=True, start=0.0, volume=0.2)
+
+        
 
         while True:
             self.draw()
-
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    pygame.mixer.music.stop()
+                    self.sound.stop_music()
                     pygame.quit()
                     sys.exit()
 
                 for name, btn in self.buttons.items():
                     if btn.handle_event(event):
                         if name == "Play":
-                            pygame.mixer.music.stop()
+                            self.sound.stop_music()
                             return "Play"
                         elif name == "Settings":
                             return "Settings"
@@ -135,6 +130,6 @@ class Menu:
                         elif name == "Credits":
                             return "Credits"
                         elif name == "Quit":
-                            pygame.mixer.music.stop()
+                            self.sound.stop_music()
                             pygame.quit()
                             sys.exit()

@@ -1,54 +1,59 @@
 import pygame
-import time 
+import os
+from game import Game
 
-# pygame.init()
-# pygame.mixer.init()
-# clock = pygame.time.Clock()
-# screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-# pygame.display.set_caption('RAD ZONE')
-# startup_sound = pygame.mixer.Sound('RAD ZONE\current version\MP3\pygame.mp3')
+# -------- AUDIO CONFIG (MUST COME FIRST) --------
+pygame.mixer.pre_init(
+    frequency=44100,                # SAMPLE RATE
+    size=-16,                       # 16 BIT
+    channels=2,                     # STEREO/MONO
+    buffer=8192                     # Stable music + low-latency SFX
+)
+
+pygame.init()                       # Initializes all pygame modules INCLUDING mixer
+pygame.mixer.set_num_channels(64)   # SETS THE NUMBER OF AUDIO CHANNELS
+pygame.mixer.set_reserved(8)        # Protects SFX channels from music
+
+clock = pygame.time.Clock()
+screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+screen_width, screen_height = screen.get_size()
+pygame.display.set_caption('RAD ZONE')
+
+# -------- STARTUP SOUND --------
+# startup_sound = pygame.mixer.Sound('RAD ZONE/current version/Audio/pygame.wav')
 # startup_sound.play()
 
-# Game_logo_surf_white = pygame.image.load('RAD ZONE/current version/Graphics/Nuclear_Nacho_Logo_White.png').convert_alpha()
-# Game_logo_rect_white = Game_logo_surf_white.get_rect( center = (960, 540))
+# -------- FUNCTION TO PLAY ANIMATED LOGO --------
+def play_nacho_logo(screen, clock, folder_path='RAD ZONE/current version/Graphics/Nacho Logo Animation', fps=24):
+    # Load all PNG frames in order
+    frames = []
+    frame_files = sorted(f for f in os.listdir(folder_path) if f.startswith("frame") and f.endswith(".png"))
+    
+    for file in frame_files:
+        img = pygame.image.load(os.path.join(folder_path, file)).convert_alpha()
+        frames.append(img)
 
-# Game_logo_surf_black = pygame.image.load('RAD ZONE/current version/Graphics/Nuclear_Nacho_Logo_Black.png').convert_alpha()
-# Game_logo_rect_black = Game_logo_surf_black.get_rect( center = (960, 540))
+    startup_sound = pygame.mixer.Sound('RAD ZONE/current version/Audio/pygame.wav')
+    startup_sound.play()
 
-# Flicker_Interval = 60
-# Flicker_Duration = 2500
+    # Compute centered rectangles for each frame
+    rects = [frame.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2)) for frame in frames]
 
-# Start_time = pygame.time.get_ticks()
-# Last_flicker = 0
-# use_White = False
-# Flicker_active = True
+    # Play frames
+    for frame, rect in zip(frames, rects):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
 
-# def blitblack():
-#     screen.blit(Game_logo_surf_black, Game_logo_rect_black)
-#     pygame.display.flip()
-# def blitwhite():
-#     screen.blit(Game_logo_surf_white, Game_logo_rect_white)
-#     pygame.display.flip()
+        screen.fill((0, 0, 0))
+        screen.blit(frame, rect)
+        pygame.display.flip()
+        clock.tick(fps)
 
+# -------- PLAY ANIMATED LOGO --------
+play_nacho_logo(screen, clock)
+pygame.time.delay(500)  # optional pause before starting game
 
-# blitblack()
-# time.sleep(0.1)
-# blitwhite()
-# time.sleep(0.1)
-# blitblack()
-# time.sleep(0.1)
-# blitwhite()
-# time.sleep(0.1)
-# blitblack()
-# time.sleep(0.5)
-# blitwhite()
-
-
-# time.sleep(2.5)
-
-
-from game import Game
-pygame.init()          # initialize all Pygame modules
-pygame.mixer.init()    # initialize the audio mixer
-
+# -----------------------------------------------
 Game().run()
