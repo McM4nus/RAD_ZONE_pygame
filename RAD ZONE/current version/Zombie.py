@@ -110,7 +110,7 @@ class Zombie:
         return self._pos
 
     def get_rect(self):
-        width, height = 70, 115  # match your hitbox
+        width, height = 60, 100  # match your hitbox
         pos = self.get_position()
         return pygame.Rect(pos.x - width//2,
                            pos.y - height//2 +9,

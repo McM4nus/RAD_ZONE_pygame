@@ -14,8 +14,8 @@ class Player:
         self._rect = surf.get_rect(center=pos)
         
         # --- Adjust rect size ---
-        self._rect.width = 70
-        self._rect.height = 120
+        self._rect.width = 55
+        self._rect.height = 100
         
         # --- Offset the rect relative to sprite center ---
         self._rect_offset = pygame.Vector2(3, 10)  # move rect right by 30 pixels
@@ -374,7 +374,7 @@ class Player:
                 3
             )
 
-        # # --- DEBUG: Player_hitbox ---
+        # --- DEBUG: Player_hitbox ---
         # debug_rect = self._rect.copy()
         # debug_rect.topleft -= cam_offset  # world -> screen
         # pygame.draw.rect(screen, (255, 0, 0), debug_rect, 2)

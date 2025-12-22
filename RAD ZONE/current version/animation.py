@@ -3,7 +3,7 @@ import os
 
 # ---------- CONSTANTS ----------
 FRAME_W, FRAME_H = 32, 32
-SCALE = 4
+SCALE = 3.5
 ANIM_FPS = 10
 
 DIRECTIONS = ["front", "back", "right", "left"]
