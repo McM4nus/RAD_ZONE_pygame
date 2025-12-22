@@ -1,6 +1,7 @@
 import pygame
 from ui import BoxButton
 from audio_menu import Audio_Menu
+from controls_menu import ControlsMenu  # import the controls menu class
 
 
 class SettingsMenu:
@@ -31,7 +32,7 @@ class SettingsMenu:
 
         # Buttons
         start_y = 500
-        spacing = int(self.height * 0.12)
+        spacing = int(self.height * 0.07)
         center_x = self.width // 2
         font = pygame.font.Font("RAD ZONE/UI/Menu/edit-undo.brk.ttf", 48)
 
@@ -71,10 +72,12 @@ class SettingsMenu:
                         if name == "Audio":
                             audio_menu_screen = Audio_Menu(self.screen, self.sound_manager)
                             audio_menu_screen.run()
-                            return self.run()
-
-                            # After Audio_Menu closes, continue showing settings menu
                             return self.run()  # restart the settings menu loop
-                        else:
-                            # For "Controls" or "Back", return button name as usual
-                            return name
+
+                        elif name == "Controls":
+                            controls_menu = ControlsMenu(self.screen, self.sound_manager)
+                            controls_menu.run()
+                            return self.run()  # restart the settings menu loop
+
+                        elif name == "Back":
+                            return "Back"

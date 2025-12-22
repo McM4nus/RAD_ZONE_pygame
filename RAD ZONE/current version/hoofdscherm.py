@@ -63,15 +63,6 @@ class Menu:
         # Get rect centered
         self.bg_rect = self.background.get_rect(center=(self.width // 2, self.height // 2))
 
-        # # -----------------------------
-        # #   LOAD & START MUSIC
-        # # -----------------------------
-        # pygame.mixer.init()
-        # pygame.mixer.music.load("RAD ZONE/current version/Audio/intro_loop.wav")
-        # pygame.mixer.music.set_volume(0.7)
-        # start_second = 5
-        # pygame.mixer.music.play(-1, start=start_second)
-
         # -----------------------------
         #   CREATE BUTTONS
         # -----------------------------
@@ -82,11 +73,11 @@ class Menu:
         font = pygame.font.Font(font_path, 48)
 
         self.buttons = {
-            "Play": BoxButton("PLAY", (center_x, start_y + spacing * 0), size=(80, 60), font=font),
-            "Scoreboard": BoxButton("SCOREBOARD", (center_x, start_y + spacing * 1), size=(180, 60),font=font),
-            "Settings": BoxButton("SETTINGS", (center_x, start_y + spacing * 2), size=(150, 60), font=font),
-            "Credits": BoxButton("CREDITS", (center_x, start_y + spacing * 3), size=(130, 60),font=font),
-            "Quit": BoxButton("EXIT GAME", (center_x, start_y + spacing * 4), size=(150, 60),font=font),
+            "Play": BoxButton("PLAY", (center_x, start_y + spacing * 0), size=(80, 45), font=font),
+            "Scoreboard": BoxButton("SCOREBOARD", (center_x, start_y + spacing * 1), size=(180, 45),font=font),
+            "Settings": BoxButton("SETTINGS", (center_x, start_y + spacing * 2), size=(150, 45), font=font),
+            "Credits": BoxButton("CREDITS", (center_x, start_y + spacing * 3), size=(130, 45),font=font),
+            "Quit": BoxButton("EXIT GAME", (center_x, start_y + spacing * 4), size=(150, 45),font=font),
         }
         
         current_music_file = None

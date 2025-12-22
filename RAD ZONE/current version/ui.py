@@ -53,7 +53,7 @@ class BoxButton:
         border_color=(74, 111, 5, 100),
         border_width=3,
         shadow_color=(0, 0, 0),          # default black shadow
-        shadow_offset=(2, 2)             # default offset
+        shadow_offset=(4, 4)             # default offset
     ):
         self.text = text
         self.rect = pygame.Rect(0, 0, *size)

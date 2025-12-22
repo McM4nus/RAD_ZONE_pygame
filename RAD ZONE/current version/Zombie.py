@@ -210,9 +210,9 @@ class Zombie:
         screen.blit(image, image_rect)
 
         # Draw the **actual hitbox** (debug red rect)
-        hitbox_rect = self.get_rect()             # get the hitbox
-        hitbox_rect.topleft -= camera.get_position()  # adjust for camera
-        pygame.draw.rect(screen, (255, 0, 0), hitbox_rect, 2)
+        # hitbox_rect = self.get_rect()             # get the hitbox
+        # hitbox_rect.topleft -= camera.get_position()  # adjust for camera
+        # pygame.draw.rect(screen, (255, 0, 0), hitbox_rect, 2)
         # Draw health bar
         self._draw_health_bar(screen, screen_pos)
 
