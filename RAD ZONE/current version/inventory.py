@@ -7,6 +7,16 @@ WEAPON_IDS = ["knife", "pistol", "rifle", "revolver", "shotgun", "crossbow", "ma
 
 class Inventory:
     def __init__(self, socket_surf, item_data, screen_size, inventory_bg, hotbar_bg, player):
+
+        weapon_angle_offsets = {
+            "knife": 0,
+            "pistol": 0,
+            "revolver": 0,
+            "shotgun": 0,
+            "crossbow": 0,
+            "machine_gun": 0
+        }
+
         self._player = player
         self._selected_hotbar = 0
         w, h = screen_size
@@ -82,7 +92,8 @@ class Inventory:
                     item_id,
                     self._player.sound,
                     icon_surf=data["icon"],
-                    char_weapon_surf=data.get("char_weapon")
+                    char_weapon_surf=data.get("char_weapon"),
+                    angle_offset=weapon_angle_offsets.get(item_id, 0)
                 )
 
                 # Fill hotbar

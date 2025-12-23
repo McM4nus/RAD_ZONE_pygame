@@ -6,6 +6,7 @@ class Weapon:
         self.name = id                # optional, keep for display if needed
         self.sound_manager = sound_manager
 
+        # --- Weapon stats ---
         weapon_stats = {
             "knife": {
                 "damage": 50,
@@ -29,13 +30,13 @@ class Weapon:
                 "full_auto": False
             },
             "shotgun": {
-                "damage": 12,        # damage PER pellet
+                "damage": 12,        # damage per pellet
                 "range": 400,
                 "fire_rate": 0.8,
                 "width": 35,
                 "full_auto": False,
-                "pellets": 6,        # 👈 ADD THIS
-                "spread": 18         # 👈 ADD THIS (degrees)
+                "pellets": 6,        # number of pellets
+                "spread": 18         # degrees of spread
             },
             "crossbow": {
                 "damage": 60,
@@ -47,31 +48,33 @@ class Weapon:
             "machine_gun": {
                 "damage": 15,
                 "range": 600,
-                "fire_rate": 0.1,   # fast but stable
+                "fire_rate": 0.1,
                 "width": 22,
                 "full_auto": True
             }
         }
+
 
         if id not in weapon_stats:
             raise ValueError(f"Unknown weapon id: {id}")
 
         stats = weapon_stats[id]
 
-        # after loading stats:
+        # --- Assign basic stats ---
         self.damage = stats["damage"]
         self.range = stats["range"]
         self.fire_rate = stats["fire_rate"]
         self.width = stats["width"]
         self.full_auto = stats["full_auto"]
+        self.angle_offset = stats.get("angle_offset", 0)  # ✅ rotation tweak
 
-        # Optional, shotgun-only
+        # Optional: shotgun-only fields
         self.pellets = stats.get("pellets", 1)
         self.spread = stats.get("spread", 0)
 
         self._last_shot_time = 0
 
-        # --- Weapon-specific scale and offset ---
+        # --- Weapon-specific scale and offset for drawing ---
         weapon_scales = {
             "knife": 0.5,
             "pistol": 0.4,
@@ -90,9 +93,9 @@ class Weapon:
             "machine_gun": pygame.Vector2(25, 20)
         }
 
-        # Assign them to the weapon instance
         self.scale = weapon_scales.get(id, 0.6)
         self.offset = weapon_offsets.get(id, pygame.Vector2(20, 20))
+
 
 
     def equip(self):

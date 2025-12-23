@@ -115,7 +115,7 @@ class Player:
 
     def restore_stamina(self, amount):
         self._stamina = min(self._stamina + amount, self._max_stamina)
-
+    
     def _update_stamina(self, running, dt, current_time):
         if self._stamina <= self._exhaust_at:
             self._exhausted = True
@@ -277,34 +277,46 @@ class Player:
             return
 
         player_pos = pygame.Vector2(self.get_rect().center)
+
+        # 1️⃣ Compute direction FIRST
         direction = (self._mouse_world - player_pos)
         if direction.length() == 0:
             return
         direction = direction.normalize()
+        angle_offset = getattr(self._equipped_item, "angle_offset", 0)
+        direction = direction.rotate(-angle_offset)
+
+
+        # 2️⃣ Muzzle position (after direction exists)
+        muzzle_offset = 80  # pixels forward
+        start = player_pos + direction * muzzle_offset
+
         max_range = self.weapon.range
 
-        # SHOTGUN
+        # ---------------- SHOTGUN ----------------
         if self.weapon.id == "shotgun":
             pellets = self.weapon.pellets
             spread = self.weapon.spread
+
             for _ in range(pellets):
                 angle = random.uniform(-spread, spread)
                 pellet_dir = direction.rotate(angle)
-                end_pos = player_pos + pellet_dir * self.weapon.range
-                self._raycast_and_damage(player_pos, end_pos)
-                self._spawn_tracer(player_pos, end_pos, tracer_type='bullet')
+                end_pos = start + pellet_dir * max_range
 
-        # CROSSBOW
+                self._raycast_and_damage(start, end_pos)
+                self._spawn_tracer(start, end_pos, tracer_type='bullet')
+
+        # ---------------- CROSSBOW ----------------
         elif self.weapon.id == "crossbow":
-            end_pos = player_pos + direction * max_range
-            self._raycast_and_damage(player_pos, end_pos)
-            self._spawn_tracer(player_pos, end_pos, tracer_type='arrow')
+            end_pos = start + direction * max_range
+            self._raycast_and_damage(start, end_pos)
+            self._spawn_tracer(start, end_pos, tracer_type='arrow')
 
-        # NORMAL GUNS
+        # ---------------- NORMAL GUNS ----------------
         else:
-            end_pos = player_pos + direction * max_range
-            self._raycast_and_damage(player_pos, end_pos)
-            self._spawn_tracer(player_pos, end_pos, tracer_type='bullet')
+            end_pos = start + direction * max_range
+            self._raycast_and_damage(start, end_pos)
+            self._spawn_tracer(start, end_pos, tracer_type='bullet')
 
     def _raycast_and_damage(self, start, end):
         closest_zombie = None
@@ -434,12 +446,18 @@ class Player:
 
         # Determine rotation angle
         angle = direction.angle_to(pygame.Vector2(1, 0))
+
+        # Add per-weapon correction offset
+        angle_offset = getattr(self._equipped_item, "angle_offset", 0)
+        angle += angle_offset
+
         weapon = weapon_surf
 
         # Flip weapon if pointing left
         if direction.x < 0:
             weapon = pygame.transform.flip(weapon, True, False)
             angle += 180
+
 
         rotated = pygame.transform.rotate(weapon, angle)
 

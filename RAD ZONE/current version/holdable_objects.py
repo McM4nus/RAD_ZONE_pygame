@@ -3,16 +3,24 @@ from sound_manager import SoundManager
 
 # ------------------ WEAPON ------------------
 class WeaponItem:
-    def __init__(self, item_id, sound_manager=None, icon_surf=None, weapon_surf=None, char_weapon_surf=None):
+    def __init__(
+        self,
+        item_id,
+        sound_manager=None,
+        icon_surf=None,
+        weapon_surf=None,
+        char_weapon_surf=None,
+        angle_offset=0
+    ):
         self._id = item_id
-        self.icon_surf = icon_surf          # hotbar/inventory icon
-        self.weapon_surf = weapon_surf      # full weapon image for world/pickup
-        self.char_weapon_surf = char_weapon_surf  # player-held weapon image
+        self.icon_surf = icon_surf
+        self.weapon_surf = weapon_surf
+        self.char_weapon_surf = char_weapon_surf
         self._sound_manager = sound_manager
         self._position = pygame.Vector2(0, 0)
 
-
-
+        # ✅ USED BY draw_weapon()
+        self.angle_offset = angle_offset
 
 
     # ------------------ INVENTORY / SLOT ------------------
@@ -46,7 +54,6 @@ class WeaponItem:
     def play_equip_sound(self):
         if self._sound_manager:
             self._sound_manager.play_weapon(self._id, "equip")
-
 
 # ------------------ CONSUMABLE ITEM ------------------
 class ConsumableItem:

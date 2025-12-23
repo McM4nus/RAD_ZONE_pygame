@@ -118,6 +118,15 @@ class Game:
         def load_weapon(path):
             return ImageLoader.load(path, size=(96, 96))[0]
 
+        weapon_angle_offsets = {
+            "knife": 0,
+            "pistol": 2,
+            "revolver": 1,
+            "shotgun": -3,
+            "crossbow": -10,
+            "machine_gun": -20
+        }
+        
         item_data = {
             "pistol": {
                 "icon": load_icon("RAD ZONE/current version/Graphics/pistool.png"),
