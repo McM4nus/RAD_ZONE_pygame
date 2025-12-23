@@ -389,6 +389,15 @@ class Player:
         if not facing_back and self._equipped_item:
             self.draw_weapon(screen, cam_offset)
 
+        # --- Debug hitbox ---
+        if self.DEBUG:
+            pygame.draw.rect(
+                screen,                    # surface to draw on
+                (255, 0, 0),               # color (red)
+                self._rect.move(-cam_offset),  # world -> screen coordinates
+                2                           # line thickness
+            )
+
         # --- Draw tracers ---
         for tracer in self._tracers:
             tracer_pos = tracer['pos'] - cam_offset
