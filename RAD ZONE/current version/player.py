@@ -70,6 +70,7 @@ class Player:
         self._mouse_screen = pygame.Vector2(0, 0)
         self._mouse_world = pygame.Vector2(0, 0)
 
+
     def get_rect(self):
         return self._rect
 
@@ -372,21 +373,26 @@ class Player:
         # --- Sprite ---
         image = self.animator.get_image()
         sprite_pos = self._pos  # logical player position (world coordinates)
-
-        # Draw sprite at world position relative to camera
         sprite_screen_pos = sprite_pos - cam_offset
         sprite_rect = image.get_rect(center=sprite_screen_pos)
-        screen.blit(image, sprite_rect)
 
-        # --- Weapon (if equipped) ---
-        if self._equipped_item:
+        # Determine if weapon should be behind player
+        # Use animator.direction instead of movement or mouse
+        facing_back = self.animator.direction == "back"
+
+        # Draw in order: weapon behind if facing back
+        if facing_back and self._equipped_item:
             self.draw_weapon(screen, cam_offset)
 
+        screen.blit(image, sprite_rect)  # draw player sprite
+
+        if not facing_back and self._equipped_item:
+            self.draw_weapon(screen, cam_offset)
 
         # --- Draw tracers ---
         for tracer in self._tracers:
             tracer_pos = tracer['pos'] - cam_offset
-            
+
             if tracer['type'] == 'bullet':
                 pygame.draw.circle(
                     screen,
@@ -395,34 +401,26 @@ class Player:
                     3
                 )
             elif tracer['type'] == 'arrow':
-                # Draw an arrow with brown shaft and silver/grey tip
-                shaft_length = 25  # brown shaft
-                tip_length = 10    # grey tip
-                width = 6          # arrow width
+                shaft_length = 25
+                tip_length = 10
+                width = 6
                 angle = tracer['angle']
 
-                # Shaft (brown)
                 shaft_points = [
                     pygame.Vector2(shaft_length/2, 0),
                     pygame.Vector2(-shaft_length/2, -width/2),
                     pygame.Vector2(-shaft_length/2, width/2)
                 ]
                 shaft_points = [p.rotate(-angle) + tracer_pos for p in shaft_points]
-                pygame.draw.polygon(screen, (180, 100, 50), shaft_points)  # brown shaft
+                pygame.draw.polygon(screen, (180, 100, 50), shaft_points)
 
-                # Tip (grey/silver)
                 tip_points = [
                     pygame.Vector2(shaft_length/2 + tip_length, 0),
                     pygame.Vector2(shaft_length/2, -width/2),
                     pygame.Vector2(shaft_length/2, width/2)
                 ]
                 tip_points = [p.rotate(-angle) + tracer_pos for p in tip_points]
-                pygame.draw.polygon(screen, (192, 192, 192), tip_points)  # silver tip
-
-        # --- DEBUG: Player_hitbox ---
-        # debug_rect = self._rect.copy()
-        # debug_rect.topleft -= cam_offset  # world -> screen
-        # pygame.draw.rect(screen, (255, 0, 0), debug_rect, 2)
+                pygame.draw.polygon(screen, (192, 192, 192), tip_points)
 
     def draw_weapon(self, screen, cam_offset):
         if not self._equipped_item:

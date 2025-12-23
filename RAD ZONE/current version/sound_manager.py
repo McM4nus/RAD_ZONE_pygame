@@ -6,7 +6,7 @@ class SoundManager:
     def __init__(self):
         # ---------------------- GLOBAL VOLUMES ----------------------
         self.master_volume = 0.65
-        self.music_volume = 0.7
+        self.music_volume = 0.0 #0.7
         self.sfx_volume = 0.8  # SFX master volume
 
         self.weapon_volume = 0.3

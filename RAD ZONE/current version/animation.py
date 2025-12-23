@@ -60,7 +60,7 @@ def load_sheet_anim(path, frames_per_dir):
 class Animator:
     def __init__(self, assets_path):
         self.state = "idle"
-        self.direction = "front"
+        self.direction = "front"  # current facing: "front", "back", "left", "right"
         self.frame_index = 0.0
 
         self.animations = {
@@ -72,9 +72,9 @@ class Animator:
         self.image = self.animations["idle"]["front"][0]
 
     def update(self, velocity: pygame.Vector2, dt: float, current_time: float = 0, override_stab: bool = False):
-        """Update animation frames"""
-
-        # If Player is stabbing, keep stab animation
+        """Update animation frames and track facing direction"""
+        
+        # Stab animation override
         if override_stab:
             self.state = "stab"
             frames = self.animations[self.state][self.direction]
@@ -82,15 +82,17 @@ class Animator:
             self.image = frames[int(self.frame_index)]
             return
 
-        # Normal movement/idle animation
+        # Determine state and facing direction based on velocity
         if velocity.length() > 0:
             self.state = "walk"
+            # Determine dominant movement axis
             if abs(velocity.x) > abs(velocity.y):
                 self.direction = "right" if velocity.x > 0 else "left"
             else:
                 self.direction = "front" if velocity.y > 0 else "back"
         else:
             self.state = "idle"
+            # Keep direction unchanged while idle (so player continues facing last moved direction)
             self.frame_index = 0
 
         frames = self.animations[self.state][self.direction]
