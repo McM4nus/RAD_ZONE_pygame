@@ -27,6 +27,7 @@ class Slider:
         self.handle_color = (54, 164, 34)
 
     def handle_event(self, event):
+        old_value = self.value  # store old value to detect changes
         mouse_pos = pygame.Vector2(pygame.mouse.get_pos())
         filled_width = (self.value - self.min_val) / (self.max_val - self.min_val) * self.width
         handle_x = self.rect.left + filled_width
@@ -50,9 +51,10 @@ class Slider:
             rel_x = max(0, min(self.width, rel_x))
             self.value = int(self.min_val + (rel_x / self.width) * (self.max_val - self.min_val))
 
+        return self.value != old_value  # only return True if value changed
+
     def draw(self, surface):
         pygame.draw.rect(surface, self.track_color, self.rect, border_radius=6)
-
         filled_width = (self.value - self.min_val) / (self.max_val - self.min_val) * self.width
         filled_rect = pygame.Rect(self.rect.left, self.rect.top, filled_width, self.track_height)
         pygame.draw.rect(surface, self.filled_color, filled_rect, border_radius=6)
@@ -87,6 +89,7 @@ class Audio_Menu:
         spacing = int(self.height * 0.085)
         center_x = self.width // 2
 
+        # initialize sliders with current SoundManager volume
         self.sliders = {
             "Master": Slider((center_x, start_y), 300, 0, 100, int(self.sound_manager.master_volume * 100)),
             "Music": Slider((center_x, start_y + spacing), 300, 0, 100, int(self.sound_manager.music_volume * 100)),
@@ -101,8 +104,8 @@ class Audio_Menu:
 
     def draw(self):
         self.screen.blit(self.background, (0, 0))
-
         font = pygame.font.Font("RAD ZONE/current version/Fonts/BitcountGridSingle_Roman-SemiBold.ttf", 24)
+
         for name, slider in self.sliders.items():
             slider.draw(self.screen)
             label = font.render(f"{name}: {slider.value}", True, (255, 255, 255))
@@ -112,7 +115,11 @@ class Audio_Menu:
         pygame.display.flip()
 
     def run(self):
-        while True:
+        clock = pygame.time.Clock()
+        running = True
+
+        while running:
+            dt = clock.tick(60) / 1000.0  # frame delta time
             self.draw()
 
             for event in pygame.event.get():
@@ -121,21 +128,21 @@ class Audio_Menu:
                     exit()
 
                 for name, slider in self.sliders.items():
-                    slider.handle_event(event)
-                    v = slider.value / 100.0
-
-                    if name == "Master":
-                        self.sound_manager.set_master_volume(v)
-                    elif name == "Music":
-                        self.sound_manager.set_music_volume(v)
-                    elif name == "SFX":
-                        self.sound_manager.set_sfx_volume(v)
-                    elif name == "Weapons":
-                        self.sound_manager.set_weapon_volume(v)
-                    elif name == "Zombies":
-                        self.sound_manager.set_zombie_volume(v)
-                    elif name == "Player":
-                        self.sound_manager.set_player_volume(v)
+                    changed = slider.handle_event(event)
+                    if changed:  # only update SoundManager when slider actually changes
+                        v = slider.value / 100.0
+                        if name == "Master":
+                            self.sound_manager.set_master_volume(v)
+                        elif name == "Music":
+                            self.sound_manager.set_music_volume(v)
+                        elif name == "SFX":
+                            self.sound_manager.set_sfx_volume(v)
+                        elif name == "Weapons":
+                            self.sound_manager.set_weapon_volume(v)
+                        elif name == "Zombies":
+                            self.sound_manager.set_zombie_volume(v)
+                        elif name == "Player":
+                            self.sound_manager.set_player_volume(v)
 
                 if self.back_button.handle_event(event):
-                    return
+                    running = False

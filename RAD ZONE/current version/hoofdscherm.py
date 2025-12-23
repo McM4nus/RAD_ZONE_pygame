@@ -106,7 +106,7 @@ class Menu:
 
         # Play menu music ONCE via SoundManager
         if not pygame.mixer.music.get_busy():
-            self.sound.play_music(menu_music, loop=True, start=0.0, volume=0.2)
+            self.sound.play_music(menu_music, loop=True, start=0.0,)
 
         
 

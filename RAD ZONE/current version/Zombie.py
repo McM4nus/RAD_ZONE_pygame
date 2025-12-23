@@ -137,19 +137,14 @@ class Zombie:
         if self._health <= 0:
             self._health = 0
             self._is_dead = True
+
             self.death_time = current_time  # track when zombie died
             self.state = "death"
             self.animator.set_death(current_time)
 
-            # ✅ Play death sound once per zombie
+            # ✅ Play death sound once per zombie using SoundManager
             if not self._death_sound_played:
-                # Use a free mixer channel to avoid cutting other zombie sounds
-                channel = pygame.mixer.find_channel()
-                if channel:
-                    channel.play(random.choice(self.sound.zombie_death))
-                else:
-                    # fallback
-                    random.choice(self.sound.zombie_death).play()
+                self.sound.play_zombie_death()  # <-- call SoundManager method
                 self._death_sound_played = True
 
     def update(self, player_pos, dt, current_time):

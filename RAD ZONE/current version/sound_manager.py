@@ -5,19 +5,19 @@ from pathlib import Path
 class SoundManager:
     def __init__(self):
         # ---------------------- GLOBAL VOLUMES ----------------------
-        self.master_volume = 0.75
-        self.music_volume = 0.6
-        self.sfx_volume = 0.6
+        self.master_volume = 0.65
+        self.music_volume = 0.7
+        self.sfx_volume = 0.8  # SFX master volume
 
         self.weapon_volume = 0.3
-        self.zombie_volume = 0.4
-        self.player_volume = 0.5
+        self.zombie_volume = 0.7
+        self.player_volume = 0.6
 
         # ---------------------- BASE MIX LEVELS ----------------------
-        self._BASE_WEAPON = 1
-        self._BASE_ITEM = 1
-        self._BASE_ZOMBIE = 1
-        self._BASE_PLAYER = 1
+        self._BASE_WEAPON = 0.5
+        self._BASE_ITEM = 0.5
+        self._BASE_ZOMBIE = 0.7
+        self._BASE_PLAYER = 0.5
 
         # ---------------------- WEAPON SOUNDS ----------------------
         self.weapon = {
@@ -81,27 +81,26 @@ class SoundManager:
             "RAD ZONE/current version/Audio/scream_wilhelm.wav"
         )
 
-        #----------------------AUDIO INITIALIZATION----------------------
+        # ---------------------- AUDIO INITIALIZATION ----------------------
         self._player_hurt_index = 0
         self._player_hurt_channel = pygame.mixer.Channel(31)
 
         # ---------------------- CHANNELS ----------------------
         self._weapon_channels = [pygame.mixer.Channel(i) for i in range(8, 24)]
+        self._zombie_channels = [pygame.mixer.Channel(i) for i in range(24, 28)]  # new
         self._channels = {
             "item": pygame.mixer.Channel(32),
-            "zombie": pygame.mixer.Channel(33),
-            "player_death": pygame.mixer.Channel(34),
+            "player_death": pygame.mixer.Channel(33),
         }
 
         self._current_equip_sound = None
-        self._current_music_file = None  # NEW: track currently playing music
+        self._current_music_file = None  # track currently playing music
 
     # ====================== MUSIC CONTROL ======================
     def play_music(self, path, loop=True, start=0.0, volume=None):
         path = str(path)
         if self._current_music_file == path and pygame.mixer.music.get_busy():
-            return  # already playing, do nothing
-
+            return
         pygame.mixer.music.load(path)
         pygame.mixer.music.play(-1 if loop else 0, start=start)
         if volume is not None:
@@ -114,6 +113,68 @@ class SoundManager:
         pygame.mixer.music.stop()
         self._current_music_file = None
 
-    # ====================== OTHER METHODS ======================
-    # (play_weapon, play_item, play_zombie_death, play_player_hurt, etc.)
-    # ... (keep your previous methods exactly the same)
+    # ====================== VOLUME CONTROLS ======================
+    def set_master_volume(self, value: float):
+        self.master_volume = max(0.0, min(1.0, value))
+        if pygame.mixer.music.get_busy():
+            pygame.mixer.music.set_volume(self.music_volume * self.master_volume)
+
+    def set_music_volume(self, value: float):
+        self.music_volume = max(0.0, min(1.0, value))
+        if pygame.mixer.music.get_busy():
+            pygame.mixer.music.set_volume(self.music_volume * self.master_volume)
+
+    def set_sfx_volume(self, value: float):
+        self.sfx_volume = max(0.0, min(1.0, value))
+
+    def set_weapon_volume(self, value: float):
+        self.weapon_volume = max(0.0, min(1.0, value))
+
+    def set_zombie_volume(self, value: float):
+        self.zombie_volume = max(0.0, min(1.0, value))
+
+    def set_player_volume(self, value: float):
+        self.player_volume = max(0.0, min(1.0, value))
+
+    # ====================== PLAYER SOUNDS ======================
+    def play_player_hurt(self):
+        sound = self.player_hurt[self._player_hurt_index]
+        self._player_hurt_index = (self._player_hurt_index + 1) % len(self.player_hurt)
+        self._player_hurt_channel.set_volume(
+            self.master_volume * self.sfx_volume * self.player_volume
+        )
+        self._player_hurt_channel.play(sound)
+
+    def play_player_death(self):
+        ch = self._channels["player_death"]
+        ch.set_volume(self.master_volume * self.sfx_volume * self.player_volume)
+        ch.play(self.player_death)
+
+    # ====================== WEAPON SOUNDS ======================
+    def play_weapon(self, weapon_name, action):
+        if weapon_name not in self.weapon: return
+        sound = self.weapon[weapon_name].get(action)
+        if not sound: return
+        for ch in self._weapon_channels:
+            if not ch.get_busy():
+                ch.set_volume(self.master_volume * self.sfx_volume * self.weapon_volume)
+                ch.play(sound)
+                return
+
+    # ====================== ITEM SOUNDS ======================
+    def play_item(self, item_name):
+        if item_name not in self.items: return
+        ch = self._channels["item"]
+        ch.set_volume(self.master_volume * self.sfx_volume * self._BASE_ITEM)
+        ch.play(self.items[item_name])
+
+    # ====================== ZOMBIE SOUNDS ======================
+    def play_zombie_death(self):
+        sound = random.choice(self.zombie_death)
+        for ch in self._zombie_channels:
+            if not ch.get_busy():
+                ch.set_volume(self.master_volume * self.sfx_volume * self.zombie_volume * self._BASE_ZOMBIE)
+                vol = self.master_volume * self.sfx_volume * self.zombie_volume * self._BASE_ZOMBIE
+                print(f"Zombie volume = {vol}")
+                ch.play(sound)
+                return

@@ -52,8 +52,8 @@ def play_nacho_logo(screen, clock, folder_path='RAD ZONE/current version/Graphic
         clock.tick(fps)
 
 # -------- PLAY ANIMATED LOGO --------
-play_nacho_logo(screen, clock)
-pygame.time.delay(500)  # optional pause before starting game
+# play_nacho_logo(screen, clock)
+# pygame.time.delay(500)  # optional pause before starting game
 
 # -----------------------------------------------
 Game().run()
