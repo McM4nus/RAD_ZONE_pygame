@@ -336,7 +336,7 @@ class Player:
             return
         direction = direction.normalize()
         distance = (end - start).length()
-        speed = 1200  # pixels per second, tweak as needed
+        speed = 3000  # pixels per second, tweak as needed
 
         self._tracers.append({
             'pos': start.copy(),

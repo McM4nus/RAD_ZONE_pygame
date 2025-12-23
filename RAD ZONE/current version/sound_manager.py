@@ -175,6 +175,6 @@ class SoundManager:
             if not ch.get_busy():
                 ch.set_volume(self.master_volume * self.sfx_volume * self.zombie_volume * self._BASE_ZOMBIE)
                 vol = self.master_volume * self.sfx_volume * self.zombie_volume * self._BASE_ZOMBIE
-                print(f"Zombie volume = {vol}")
+                # print(f"Zombie volume = {vol}")
                 ch.play(sound)
                 return
