@@ -10,12 +10,12 @@ from sound_manager import SoundManager
 pygame.init()
 
 # Base directory (folder this file is in)
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent
 
 # -----------------------------
 #        FONT SETUP
 # -----------------------------
-FONT_PATH = BASE_DIR / "current version" / "Fonts" / "Sixtyfour-Regular-VariableFont_BLED,SCAN.ttf"
+FONT_PATH = BASE_DIR / "Fonts" / "Sixtyfour-Regular-VariableFont_BLED,SCAN.ttf"
 
 if FONT_PATH.exists():
     font = pygame.font.Font(str(FONT_PATH), 36)
@@ -55,7 +55,7 @@ class Menu:
         # -----------------------------
         #   LOAD BACKGROUND
         # -----------------------------
-        background_path = BASE_DIR / "UI" / "Menu" / "achtergrond menu.png"
+        background_path = BASE_DIR / "Graphics" / "achtergrond menu.png"
         self.background = pygame.image.load(str(background_path)).convert_alpha()
 
         orig_width, orig_height = self.background.get_size()
@@ -102,7 +102,7 @@ class Menu:
     #           RUN LOOP
     # -----------------------------
     def run(self):
-        menu_music = BASE_DIR / "current version" / "Audio" / "intro_loop_3.wav"
+        menu_music = BASE_DIR / "Audio" / "intro_loop_3.wav"
 
         # Play menu music ONCE via SoundManager
         if not pygame.mixer.music.get_busy():

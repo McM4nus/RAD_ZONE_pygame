@@ -2,8 +2,10 @@ import pygame
 import sys
 import json
 import os
+from pathlib import Path
 from ui import BoxButton
 
+BASE_DIR = Path(__file__).resolve()
 # -----------------------------
 #       HELPER FUNCTION
 # -----------------------------
@@ -32,7 +34,7 @@ class Scoreboard:
         # Background
         # -----------------------------
         bg_path = os.path.join(
-            "RAD ZONE", "UI", "Menu", "achtergrond_scoreboard.png"
+            "RAD ZONE", "current version", "Graphics", "achtergrond_scoreboard.png"
         )
         self.background = pygame.image.load(bg_path).convert_alpha()
         orig_width, orig_height = self.background.get_size()

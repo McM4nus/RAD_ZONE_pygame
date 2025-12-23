@@ -6,11 +6,11 @@ class SoundManager:
     def __init__(self):
         # ---------------------- GLOBAL VOLUMES ----------------------
         self.master_volume = 0.4
-        self.music_volume = 0.0 #0.7
-        self.sfx_volume = 0.6  # SFX master volume
+        self.music_volume = 0.5
+        self.sfx_volume = 0.5  # SFX master volume
 
         self.weapon_volume = 0.3
-        self.zombie_volume = 0.55
+        self.zombie_volume = 0.45
         self.player_volume = 0.6
 
         # ---------------------- BASE MIX LEVELS ----------------------

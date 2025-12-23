@@ -19,9 +19,6 @@ screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 screen_width, screen_height = screen.get_size()
 pygame.display.set_caption('RAD ZONE')
 
-# -------- STARTUP SOUND --------
-# startup_sound = pygame.mixer.Sound('RAD ZONE/current version/Audio/pygame.wav')
-# startup_sound.play()
 
 # -------- FUNCTION TO PLAY ANIMATED LOGO --------
 def play_nacho_logo(screen, clock, folder_path='RAD ZONE/current version/Graphics/Nacho Logo Animation', fps=24):
