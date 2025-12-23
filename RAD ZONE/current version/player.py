@@ -278,10 +278,8 @@ class Player:
 
         player_pos = pygame.Vector2(self.get_rect().center)
         direction = (self._mouse_world - player_pos)
-
         if direction.length() == 0:
             return
-
         direction = direction.normalize()
         max_range = self.weapon.range
 
@@ -289,20 +287,24 @@ class Player:
         if self.weapon.id == "shotgun":
             pellets = self.weapon.pellets
             spread = self.weapon.spread
-
             for _ in range(pellets):
                 angle = random.uniform(-spread, spread)
                 pellet_dir = direction.rotate(angle)
                 end_pos = player_pos + pellet_dir * self.weapon.range
-
                 self._raycast_and_damage(player_pos, end_pos)
-                self._spawn_tracer(player_pos, end_pos)
+                self._spawn_tracer(player_pos, end_pos, tracer_type='bullet')
+
+        # CROSSBOW
+        elif self.weapon.id == "crossbow":
+            end_pos = player_pos + direction * max_range
+            self._raycast_and_damage(player_pos, end_pos)
+            self._spawn_tracer(player_pos, end_pos, tracer_type='arrow')
 
         # NORMAL GUNS
         else:
-            end_pos = player_pos + direction * self.weapon.range
+            end_pos = player_pos + direction * max_range
             self._raycast_and_damage(player_pos, end_pos)
-            self._spawn_tracer(player_pos, end_pos)
+            self._spawn_tracer(player_pos, end_pos, tracer_type='bullet')
 
     def _raycast_and_damage(self, start, end):
         closest_zombie = None
@@ -330,20 +332,25 @@ class Player:
                 pygame.time.get_ticks() / 1000
             )
 
-    def _spawn_tracer(self, start, end):
+    def _spawn_tracer(self, start, end, tracer_type='bullet'):
         direction = (end - start)
         if direction.length() == 0:
             return
         direction = direction.normalize()
         distance = (end - start).length()
-        speed = 3000  # pixels per second, tweak as needed
-
+        
+        # Speed can depend on type
+        speed = 3000 if tracer_type == 'bullet' else 1200  # arrows slower
+        
+        
         self._tracers.append({
             'pos': start.copy(),
             'dir': direction,
             'speed': speed,
             'distance': distance,
-            'start': start.copy()
+            'start': start.copy(),
+            'type': tracer_type,
+            'angle': direction.angle_to(pygame.Vector2(1,0))  # for arrow rotation
         })
 
     # ---------- DRAW ----------
@@ -367,12 +374,38 @@ class Player:
         # --- Draw tracers ---
         for tracer in self._tracers:
             tracer_pos = tracer['pos'] - cam_offset
-            pygame.draw.circle(
-                screen,
-                (255, 240, 150),  # pale yellow
-                (int(tracer_pos.x), int(tracer_pos.y)),
-                3
-            )
+            
+            if tracer['type'] == 'bullet':
+                pygame.draw.circle(
+                    screen,
+                    (255, 240, 150),  # pale yellow
+                    (int(tracer_pos.x), int(tracer_pos.y)),
+                    3
+                )
+            elif tracer['type'] == 'arrow':
+                # Draw an arrow with brown shaft and silver/grey tip
+                shaft_length = 25  # brown shaft
+                tip_length = 10    # grey tip
+                width = 6          # arrow width
+                angle = tracer['angle']
+
+                # Shaft (brown)
+                shaft_points = [
+                    pygame.Vector2(shaft_length/2, 0),
+                    pygame.Vector2(-shaft_length/2, -width/2),
+                    pygame.Vector2(-shaft_length/2, width/2)
+                ]
+                shaft_points = [p.rotate(-angle) + tracer_pos for p in shaft_points]
+                pygame.draw.polygon(screen, (180, 100, 50), shaft_points)  # brown shaft
+
+                # Tip (grey/silver)
+                tip_points = [
+                    pygame.Vector2(shaft_length/2 + tip_length, 0),
+                    pygame.Vector2(shaft_length/2, -width/2),
+                    pygame.Vector2(shaft_length/2, width/2)
+                ]
+                tip_points = [p.rotate(-angle) + tracer_pos for p in tip_points]
+                pygame.draw.polygon(screen, (192, 192, 192), tip_points)  # silver tip
 
         # --- DEBUG: Player_hitbox ---
         # debug_rect = self._rect.copy()

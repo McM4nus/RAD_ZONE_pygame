@@ -98,10 +98,6 @@ class Weapon:
     def equip(self):
         pass  # 🔇 intentionally silent
 
-    # def shoot(self, current_time):
-    #     if current_time - self._last_shot_time < self.fire_rate:
-    #         return False
-
     def shoot(self, current_time):
         if current_time - self._last_shot_time >= self.fire_rate:
             self._last_shot_time = current_time
